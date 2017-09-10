@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+
+<AnchorPane prefHeight="650.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.starkus.mipseditor.view.MainWindowController">
+   <children>
+      <VBox prefHeight="650.0" prefWidth="800.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <MenuBar>
+              <menus>
+                <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem fx:id="newCmd" mnemonicParsing="false" text="New..." />
+                    <SeparatorMenuItem />
+                    <MenuItem fx:id="openCmd" mnemonicParsing="false" text="Open..." />
+                    <MenuItem fx:id="saveCmd" mnemonicParsing="false" text="Save" />
+                    <MenuItem fx:id="saveAsCmd" mnemonicParsing="false" text="Save As..." />
+                    <MenuItem fx:id="saveCopyCmd" mnemonicParsing="false" text="Save Copy..." />
+                    <MenuItem fx:id="saveAllCmd" mnemonicParsing="false" text="Save All" />
+                    <MenuItem fx:id="closeCmd" mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem fx:id="undoCmd" mnemonicParsing="false" text="Undo" />
+                    <MenuItem fx:id="redoCmd" mnemonicParsing="false" text="Redo" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About..." />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS" />
+            <Pane fx:id="statusBar" prefWidth="800.0" style="-fx-background-color: derive(-fx-base,20%);">
+               <children>
+                  <Label text="Status bar here">
+                     <padding>
+                        <Insets bottom="4.0" left="12.0" right="4.0" top="4.0" />
+                     </padding>
+                  </Label>
+               </children>
+            </Pane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
