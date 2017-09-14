@@ -1,0 +1,76 @@
+.code-area {
+	-fx-background-color: -fx-base;
+	
+	-fx-highlight-fill: derive(-fx-base, 35%);
+	
+	-fx-font-family: "Courier New";
+	-fx-font-size: 11pt;
+}
+
+.caret {
+	-fx-stroke: white;
+}
+
+.lineno {
+	-fx-background-color: transparent;
+	-fx-padding: 0 16 0 10;
+}
+
+.paragraph-box:has-caret {
+    -fx-background-color: derive(-fx-base, 16%);
+}
+
+.tooltip {
+	-fx-background-color: #bcc0c6;
+	-fx-font-size: 9pt;
+	-fx-padding: 7;
+}
+
+.tooltip-title {
+	-fx-font-weight: bold;
+	-fx-font-size: 10pt;
+	-fx-fill: black;
+}
+
+.tooltip-content {
+}
+
+
+.normal-code {
+	-fx-fill: white;
+}
+
+.asm-instruction {
+	-fx-fill: #ff7728;
+}
+
+.opcode {
+	-fx-fill: #ea236c;
+	-fx-font-weight: bold;
+}
+
+.register-name {
+	-fx-fill: #2eaf07;
+	-fx-font-weight: bold;
+}
+
+.comment {
+	-fx-fill: #777777;
+	-fx-font-style: italic;
+}
+
+.string {
+	-fx-fill: #ffc700;
+}
+
+.literal {
+	-fx-fill: #8bc6e0;
+}
+
+.label-s {
+	-fx-fill: gold;
+}
+
+.define {
+	-fx-fill: #9bf442;
+}

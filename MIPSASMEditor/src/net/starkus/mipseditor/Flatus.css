@@ -1,0 +1,231 @@
+.root {
+	-fx-font-smoothing-type: lcd;
+	
+	-fx-base: #1c2123;
+	-fx-focus-color: #138fd6;
+	
+	-secondary-color: -fx-focus-color;
+}
+
+.background {
+	-fx-background-color: -fx-base;
+}
+
+.label {
+	-fx-font-size: 10pt;
+	-fx-font-family: "PageSans-DemiBold";
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+	-fx-opacity: 0.6;
+}
+
+
+.menu-bar {
+    -fx-background-color: derive(-fx-base,20%);
+}
+
+.context-menu {
+    -fx-background-color: derive(-fx-base,50%);
+}
+
+.menu-item:hover {
+	-fx-background-color: derive(-fx-base,70%);
+}
+
+.menu-item:focused, .menu-item:hover:focused {
+	-fx-background-color: -fx-focus-color;
+}
+
+.menu-item .label {
+    -fx-font-size: 10pt;
+    -fx-font-family: "Lato Light";
+    -fx-text-fill: white;
+    -fx-opacity: 0.9;
+}
+
+.menu-bar .label {
+    -fx-font-size: 12pt;
+    -fx-font-family: "Lato Light";
+    -fx-text-fill: white;
+    -fx-opacity: 0.9;
+}
+
+.menu .left-container {
+    -fx-background-color: black;
+}
+
+.text-field {
+    -fx-font-size: 12pt;
+    -fx-font-family: "PageSans-DemiBold";
+    -fx-font-style: normal;
+    
+    -fx-background-color: white;
+	
+	-fx-padding: 8px;
+}
+
+
+.button {
+    -fx-padding: 5 22 5 22;   
+    -fx-border-style: none;
+    -fx-background-radius: 4px;
+    -fx-background-color: #ecf0f1;
+    -fx-font-family: "Lato";
+    -fx-font-size: 11pt;
+    -fx-text-fill: black;
+    -fx-background-insets: 0 0 0 0, 0, 1, 2;
+}
+
+.button:hover {
+    -fx-background-color: white;
+}
+
+.button:pressed {
+  -fx-background-color: #bdc3c7;
+  -fx-text-fill: derive(black, 20%);
+}
+
+.button:disabled, .button:default:disabled {
+    -fx-opacity: 0.6;
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: black;
+}
+
+.button:default {
+    -fx-background-color: #cc344c;
+    -fx-text-fill: white;
+}
+
+.button:default:hover {
+    -fx-background-color: derive(#cc344c,30%);
+}
+
+.button:default:hover:pressed {
+  -fx-background-color: #7f8c8d;
+  -fx-text-fill: derive(white, 20%);
+}
+
+
+.toggle-button {
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-background-radius: 15px;
+    -fx-background-color: white;
+    -fx-font-family: "Lato";
+    -fx-font-size: 11pt;
+    -fx-text-fill: black;
+    -fx-max-height: 30;
+}
+
+.toggle-button:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.toggle-button:pressed, .toggle-button:default:hover:pressed {
+  -fx-background-color: black;
+  -fx-text-fill: -fx-base;
+}
+
+
+.choice-box .menu-item 
+{
+    -fx-background-color: transparent;
+    -fx-text-fill: #d8d8d8;
+    -fx-padding: 3 0 2 7;
+}
+
+.choice-box .menu-item:focused {
+	-fx-background-color: #95a5a6;
+}
+
+.choice-box .menu-item:hover
+{
+    -fx-background-color: #1abc9c;
+}
+
+.choice-box .menu-item .label {
+    -fx-font-family: "Lato";
+    -fx-font-size: 10pt;
+	
+}
+
+.choice-box .menu-item:hover .label {
+    -fx-text-fill: white;
+	
+}
+
+.choice-box .context-menu 
+{
+    -fx-background-color: white;
+    -fx-background-radius: 3px;
+}
+
+.choice-box .label {
+	-fx-text-fill: black;
+}
+
+.choice-box {
+    -fx-padding: 0;   
+    -fx-border-style: none;
+    -fx-background-radius: 17px;
+    -fx-background-color: #ecf0f1;
+    -fx-background-insets: 0;
+}
+
+.choice-box:hover
+{
+    -fx-background-color: white;
+}
+
+.choice-box:focused {
+}
+
+.total-row {
+    -fx-font-family: "Lato";
+    -fx-font-size: 32pt;
+}
+
+
+.tool-bar {
+	-fx-background-color: -fx-base;
+}
+
+
+.tab {
+	-fx-border-width: 0;
+	
+	-fx-background-color: transparent;
+	-fx-padding: 8px;
+}
+
+.tab:selected {
+	-fx-background-color: -fx-focus-color;
+	-fx-background-radius: 0;
+}
+
+.tab:selected .focus-indicator {
+	-fx-border-width: 0;
+}
+
+.tab-label {
+	-fx-text-fill: white;
+    -fx-font-size: 12pt;
+    -fx-font-family: "Lato";
+	-fx-padding: 0 8px 0 8px;
+	-fx-graphic-text-gap: 12px;
+}
+
+.tab-pane {
+	-fx-tab-min-width: 90.0;
+	-fx-tab-min-height: 25.0;
+}
+
+.tab-header-area {
+	-fx-padding: 8 24 8 24;
+}
+
+.tab-header-background {
+	-fx-background-color: linear-gradient(to bottom, black, transparent), derive(-fx-base, 20%);
+	-fx-background-radius: 0;
+	-fx-background-insets: 8 8 -4 8, 8;
+}

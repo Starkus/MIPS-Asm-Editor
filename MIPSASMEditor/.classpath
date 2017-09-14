@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/fxmisc/richtext/richtextfx/0.7-M5/richtextfx-0.7-M5.jar" sourcepath="M2_REPO/org/fxmisc/richtext/richtextfx/0.7-M5/richtextfx-0.7-M5-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/fxmisc/wellbehaved/wellbehavedfx/0.3/wellbehavedfx-0.3.jar" sourcepath="M2_REPO/org/fxmisc/wellbehaved/wellbehavedfx/0.3/wellbehavedfx-0.3-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/fxmisc/undo/undofx/1.2.2/undofx-1.2.2.jar" sourcepath="M2_REPO/org/fxmisc/undo/undofx/1.2.2/undofx-1.2.2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/reactfx/reactfx/2.0-M5/reactfx-2.0-M5.jar" sourcepath="M2_REPO/org/reactfx/reactfx/2.0-M5/reactfx-2.0-M5-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/fxmisc/flowless/flowless/0.5.2/flowless-0.5.2.jar" sourcepath="M2_REPO/org/fxmisc/flowless/flowless/0.5.2/flowless-0.5.2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/google/code/gson/gson/2.8.1/gson-2.8.1.jar" sourcepath="M2_REPO/com/google/code/gson/gson/2.8.1/gson-2.8.1-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

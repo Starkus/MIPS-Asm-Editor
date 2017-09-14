@@ -1,0 +1,33 @@
+.background {
+	-fx-background-color: derive(-fx-base, 20%);
+}
+
+.background * {
+	-fx-max-height: 270px;
+}
+
+.item {
+	-fx-background-color: derive(black, 5%);
+	-fx-background-radius: 0;
+	
+	-fx-border-style: solid;
+	-fx-border-insets: 0 0 -1px 0;
+	-fx-border-width: 0 0 1px 0;
+	-fx-border-color: derive(black,80%);
+	
+	-fx-font-family: "Courier New";
+	-fx-font-size: 10pt;
+	-fx-text-fill: derive(white, -5%);
+    
+    -fx-alignment: center-left;
+}
+
+.item:hover {
+	-fx-background-color: -fx-focus-color;
+	-fx-text-fill: white;
+}
+
+.item-selected {
+	-fx-background-color: -fx-focus-color;
+	-fx-text-fill: white;
+}

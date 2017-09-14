@@ -1,0 +1,8 @@
+<project default="copy-resources">
+  <target name="init"/>
+  <target name="copy-resources" depends="init">
+    <copy todir="target/classes/src" filtering="false">
+      <fileset dir="." includes="" excludes="**/*.java|**/*.java"/>
+    </copy>
+  </target>
+</project>

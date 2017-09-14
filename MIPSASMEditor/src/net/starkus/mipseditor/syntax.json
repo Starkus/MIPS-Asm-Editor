@@ -1,0 +1,623 @@
+{
+	"assemblerInstructions": [
+		{
+			"keyword": ".include",
+			"name": "Include",
+			"description": "The assembler replaces this line with the code from the specified file.",
+			"syntax": ".include \"<filename>\""
+		},
+		{
+			"keyword": ".org",
+			"name": "???",
+			"description": "The assembler inserts the code at given address. I think.",
+			"syntax": ".org <address>"
+		}
+	],
+	"arithmeticOpcodes": [
+		{
+			"keyword": "ADD",
+			"name": "Add",
+			"description": "Add two registers.",
+			"syntax": "ADD RD, RS, RT"
+		},
+		{
+			"keyword": "ADDI",
+			"name": "Add immediate",
+			"description": "Add literal to register.",
+			"syntax": "ADDI RD, RS, LI"
+		},
+		{
+			"keyword": "ADDIU",
+			"name": "Add immediate unsigned",
+			"description": "Add literal to register (no overflow).",
+			"syntax": "ADDIU RD, RS, LI"
+		},
+		{
+			"keyword": "ADDU",
+			"name": "Add unsigned",
+			"description": "Add two registers (no overflow).",
+			"syntax": "ADDU RD, RS, RT"
+		},
+		{
+			"keyword": "SUB",
+			"name": "Subtract",
+			"description": "Substract two registers.",
+			"syntax": "SUB RD, RS, RT"
+		},
+		{
+			"keyword": "SUBU",
+			"name": "Subtract unsigned",
+			"description": "Substract two registers (no overflow).",
+			"syntax": "SUBU RD, RS, RT"
+		},
+		{
+			"keyword": "DIV",
+			"name": "Divide",
+			"description": "Divides source by target and stores quotient in LO and reminder in HI.",
+			"syntax": "DIV RS, RT"
+		},
+		{
+			"keyword": "DIVU",
+			"name": "Divide unsigned",
+			"description": "Divides source by target and stores quotient in LO and reminder in HI.",
+			"syntax": "DIVU RS, RT"
+		},
+		{
+			"keyword": "MULT",
+			"name": "Multiply",
+			"description": "Multiplies source by target and stores result in LO (and HI if >16 bits).",
+			"syntax": "MULT RS, RT"
+		},
+		{
+			"keyword": "MULTU",
+			"name": "",
+			"description": "Multiplies source by target and stores result in LO (and HI if >16 bits).",
+			"syntax": "MULT RS, RT"
+		}
+	],
+	"moveOpcodes": [
+		{
+			"keyword": "LUI",
+			"name": "Load upper immediate",
+			"description": "Shift immediate value left 16 bits and stores it in the register. Lower 16 bits are zeroes.",
+			"syntax": "LUI RT, LI"
+		},
+		{
+			"keyword": "LB",
+			"name": "Load byte",
+			"description": "Load byte from specified address into register.",
+			"syntax": "LB RT, Offset(RS)"
+		},
+		{
+			"keyword": "LW",
+			"name": "Load word",
+			"description": "Load word from specified address into register.",
+			"syntax": "LW RT, Offset(RS)"
+		},
+		{
+			"keyword": "SB",
+			"name": "Save byte",
+			"description": "Least significant byte from target is stored at specified address.",
+			"syntax": "SB RT, Offset(RS)"
+		},
+		{
+			"keyword": "SW",
+			"name": "Save word",
+			"description": "Store value from register into specified address.",
+			"syntax": "SW RT, Offset(RS)"
+		},
+		{
+			"keyword": "MFHI",
+			"name": "Move from HI",
+			"description": "Move value from HI to specified register.",
+			"syntax": "MFHI RD"
+		},
+		{
+			"keyword": "MFLO",
+			"name": "Move from LO",
+			"description": "Move value from LO to specified register.",
+			"syntax": "MFLO RD"
+		}
+	],
+	"branchOpcodes": [
+		{
+			"keyword": "BEQ",
+			"name": "Branch if equal",
+			"description": "Branch if both registers are equal.",
+			"syntax": "BEQ RS, RT, Offset"
+		},
+		{
+			"keyword": "BGEZ",
+			"name": "Branch if greater or equal to zero",
+			"description": "Branch if the register is greater or equal to zero.",
+			"syntax": "BGEZ RS, Offset"
+		},
+		{
+			"keyword": "BGEZAL",
+			"name": "Branch if greater or equal to zero and link",
+			"description": "Branch if the register is greater or equal to zero and returns in R31.",
+			"syntax": "BGEZAL RS, Offset"
+		},
+		{
+			"keyword": "BGTZ",
+			"name": "Branch if greater than zero",
+			"description": "Branch if the register is greater than zero.",
+			"syntax": "BGTZ RS, Offset"
+		},
+		{
+			"keyword": "BLEZ",
+			"name": "Branch if less or equal to zero",
+			"description": "Branch if the register is less or equal to zero.",
+			"syntax": "BLEZ RS, Offset"
+		},
+		{
+			"keyword": "BLTZ",
+			"name": "Branch if less than zero",
+			"description": "Branch if the register is less than zero.",
+			"syntax": "BLTZ RS, Offset"
+		},
+		{
+			"keyword": "BLTZAL",
+			"name": "Branch if less than zero and link",
+			"description": "Branch if the register is less than zero and returns in R31.",
+			"syntax": "BLTZAL RS, Offset"
+		},
+		{
+			"keyword": "BNE",
+			"name": "Branch if not equal",
+			"description": "Branch if the registers are not equal.",
+			"syntax": "BNE RS, RT, Offset"
+		},
+		{
+			"keyword": "J",
+			"name": "Jump",
+			"description": "Jump to the calculated address.",
+			"syntax": "J Target"
+		},
+		{
+			"keyword": "JAL",
+			"name": "Jump and link",
+			"description": "Jump to the calculated address and return to R31.",
+			"syntax": "JAL Target"
+		},
+		{
+			"keyword": "JR",
+			"name": "Jump register",
+			"description": "Jump to address contained in register.",
+			"syntax": "JR RS"
+		}
+	],
+	"logicOpcodes": [
+		{
+			"keyword": "SLT",
+			"name": "Set on less than",
+			"description": "If source less than target, destination is set to one, otherwise to zero.",
+			"syntax": "SLT RD, RS, RT"
+		},
+		{
+			"keyword": "SLTI",
+			"name": "Set on less than immediate",
+			"description": "If source less than literal, destination is set to one, otherwise to zero.",
+			"syntax": "SLTI RT, RS, LI"
+		},
+		{
+			"keyword": "SLTIU",
+			"name": "Set on less than immediate unsigned",
+			"description": "If source less than unsigned literal, destination is set to one, otherwise to zero.",
+			"syntax": "SLTIU RT, RS, LI"
+		},
+		{
+			"keyword": "SLTU",
+			"name": "Set on less than unsigned",
+			"description": "If source less than target, destination is set to one, otherwise to zero.",
+			"syntax": "SLTU RT, RS, LI"
+		},
+		{
+			"keyword": "AND",
+			"name": "And",
+			"description": "Bitwise AND between two registers.",
+			"syntax": "AND RD, RS, RT"
+		},
+		{
+			"keyword": "ANDI",
+			"name": "And immediate",
+			"description": "Bitwise AND between a register and a literal.",
+			"syntax": "ANDI RT, RS, i"
+		},
+		{
+			"keyword": "OR",
+			"name": "Or",
+			"description": "Bitwise OR between two registers.",
+			"syntax": "OR RD, RS, RT"
+		},
+		{
+			"keyword": "ORI",
+			"name": "Or immediate",
+			"description": "Bitwise OR between a register and a literal.",
+			"syntax": "ORI RT, RS, LI"
+		},
+		{
+			"keyword": "XOR",
+			"name": "Exclusive or",
+			"description": "Bitwise XOR between two registers.",
+			"syntax": "XOR RD, RS, RT"
+		},
+		{
+			"keyword": "XORI",
+			"name": "Exclusive or immediate",
+			"description": "Bitwise XOR between a register and a literal.",
+			"syntax": "XORI RT, RS, LI"
+		},
+		{
+			"keyword": "SLL",
+			"name": "Shift left logical",
+			"description": "Shift register value left by immediate ammout and store in another register.",
+			"syntax": "SLL RD, RT, LI"
+		},
+		{
+			"keyword": "SLLV",
+			"name": "Shift left logical variable",
+			"description": "Shift target value left by source ammount and store in destination.",
+			"syntax": "SLLV RD, RT, RS"
+		},
+		{
+			"keyword": "SRA",
+			"name": "Shift right arithmetic",
+			"description": "Shift a register value right by immediate ammount and store in another register. Sign bit is shifted in.",
+			"syntax": "SRA RD, RT, LI"
+		},
+		{
+			"keyword": "SRL",
+			"name": "Shift right logical",
+			"description": "Shift a register value right by immediate ammount and store in another register. Zeroes are shifted in.",
+			"syntax": "SRL RD, RT, LI"
+		},
+		{
+			"keyword": "SRLV",
+			"name": "Shift right logical variable",
+			"description": "Shift target value right by source ammount and store in destination. Zeroes are shifted in.",
+			"syntax": "SRLV RD, RT, RS"
+		},
+		{
+			"keyword": "NOOP",
+			"name": "No operation",
+			"description": "Do nothing.",
+			"syntax": "NOOP"
+		},
+		{
+			"keyword": "NOP",
+			"name": "No operation",
+			"description": "Do nothing.",
+			"syntax": "NOP"
+		},
+		{
+			"keyword": "SYSCALL",
+			"name": "System call",
+			"description": "Generates a software interrupt.",
+			"syntax": "SYSCALL"
+		}
+	],
+	
+	"registerNames": [
+		{
+			"name": "zero",
+			"register": "R0",
+			"description": "R0 is a hard-wired zero register. It's value is always zero."
+		},
+		{
+			"name": "V0",
+			"register": "R2",
+			"description": "Contains return values from subroutines. If return value is 64-bit wide, V1 is also used."
+		},
+		{
+			"name": "V1",
+			"register": "R3",
+			"description": "Contains the higher bits from function return values."
+		},
+		{
+			"name": "A0",
+			"register": "R4",
+			"description": "Meant for subroutine parameters"
+		},
+		{
+			"name": "A1",
+			"register": "R5",
+			"description": "Meant for subroutine parameters"
+		},
+		{
+			"name": "A2",
+			"register": "R6",
+			"description": "Meant for subroutine parameters"
+		},
+		{
+			"name": "A3",
+			"register": "R7",
+			"description": "Meant for subroutine parameters"
+		},
+		{
+			"name": "T0",
+			"register": "R8",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T1",
+			"register": "R9",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T2",
+			"register": "R10",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T3",
+			"register": "R11",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T4",
+			"register": "R12",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T5",
+			"register": "R13",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T6",
+			"register": "R14",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T7",
+			"register": "R15",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "S0",
+			"register": "R16",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S1",
+			"register": "R17",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S2",
+			"register": "R18",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S3",
+			"register": "R19",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S4",
+			"register": "R20",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S5",
+			"register": "R21",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S6",
+			"register": "R22",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "S7",
+			"register": "R23",
+			"description": "Is supposed not to be changed by subroutines."
+		},
+		{
+			"name": "T8",
+			"register": "R24",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "T9",
+			"register": "R25",
+			"description": "Used for local values inside a subroutine."
+		},
+		{
+			"name": "K0",
+			"register": "R26",
+			"description": "Kernel reserved."
+		},
+		{
+			"name": "K1",
+			"register": "R27",
+			"description": "Kernel reserved."
+		},
+		{
+			"name": "GP",
+			"register": "R28",
+			"description": "Global Pointer. Points to the middle of the block memory in the static data segment."
+		},
+		{
+			"name": "SP",
+			"register": "R29",
+			"description": "Stack Pointer. Points to the top of the stack."
+		},
+		{
+			"name": "FP",
+			"register": "R30",
+			"description": "Frame Pointer. Previous top of the stack."
+		},
+		{
+			"name": "RA",
+			"register": "R31",
+			"description": "Return address register. Saves the address to jump back to once a subroutine is over."
+		},
+		{
+			"name": "F0",
+			"register": "R32",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F1",
+			"register": "R33",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F2",
+			"register": "R34",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F3",
+			"register": "R35",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F4",
+			"register": "R36",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F5",
+			"register": "R37",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F6",
+			"register": "R38",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F7",
+			"register": "R39",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F8",
+			"register": "R40",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F9",
+			"register": "R41",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F10",
+			"register": "R42",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F11",
+			"register": "R43",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F12",
+			"register": "R44",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F13",
+			"register": "R45",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F14",
+			"register": "R46",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F15",
+			"register": "R47",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F16",
+			"register": "R48",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F17",
+			"register": "R49",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F18",
+			"register": "R50",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F19",
+			"register": "R51",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F20",
+			"register": "R52",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F21",
+			"register": "R53",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F22",
+			"register": "R54",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F23",
+			"register": "R55",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F24",
+			"register": "R56",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F25",
+			"register": "R57",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F26",
+			"register": "R58",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F27",
+			"register": "R59",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F28",
+			"register": "R60",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F29",
+			"register": "R61",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F30",
+			"register": "R62",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F31",
+			"register": "R63",
+			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "F32",
+			"register": "R64",
+			"description": "Used for floating-point operations."
+		}
+	]
+}
