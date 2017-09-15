@@ -1,24 +1,25 @@
-package net.starkus.mipseditor.syntax;
+package net.starkus.mipseditor.assistant.keyword;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.google.gson.Gson;
 
 public class KeywordBank {
 
-	private final HashMap<String, Syntax.Keyword> assemblerInstructions = new HashMap<>();
-	private final HashMap<String, Syntax.Keyword> opcodes = new HashMap<>();
-	private final HashMap<String, Syntax.Keyword> registers = new HashMap<>();
+	private final HashMap<String, Keyword> keywords = new HashMap<>();
 	
 	
 	public KeywordBank()
 	{
 		
 	}
+	
 	public KeywordBank(File file)
 	{
 		try {
@@ -47,99 +48,99 @@ public class KeywordBank {
 		
 		SyntaxFile syntaxFile = gson.fromJson(text, SyntaxFile.class);
 		
-		for (AssemblerInstructionEntry entry : syntaxFile.assemblerInstructions)
+		for (DirectiveEntry entry : syntaxFile.directives)
 		{
-			Syntax.Keyword keyword = new Syntax.Keyword(Syntax.KeywordType.OPCODE, 
+			Keyword keyword = new KeywordDirective( 
 					entry.keyword, 
 					entry.name, 
 					entry.description + "\nSyntax: " + entry.syntax);
 
-			assemblerInstructions.put(keyword.keyword, keyword);
+			keywords.put(keyword.getKeyword(), keyword);
 		}
 		
 		for (OpCodeEntry entry : syntaxFile.arithmeticOpcodes)
 		{
-			Syntax.Keyword keyword = new Syntax.Keyword(Syntax.KeywordType.OPCODE, 
+			Keyword keyword = new KeywordOpcode( 
 					entry.keyword, 
 					entry.name, 
 					entry.description + "\nSyntax: " + entry.syntax);
-			
-			opcodes.put(keyword.keyword, keyword);
+
+			keywords.put(keyword.getKeyword(), keyword);
 		}
 		
 		for (OpCodeEntry entry : syntaxFile.moveOpcodes)
 		{
-			Syntax.Keyword keyword = new Syntax.Keyword(Syntax.KeywordType.OPCODE, 
+			Keyword keyword = new KeywordOpcode( 
 					entry.keyword, 
 					entry.name, 
 					entry.description + "\nSyntax: " + entry.syntax);
 
-			opcodes.put(keyword.keyword, keyword);
+			keywords.put(keyword.getKeyword(), keyword);
 		}
 		
 		for (OpCodeEntry entry : syntaxFile.branchOpcodes)
 		{
-			Syntax.Keyword keyword = new Syntax.Keyword(Syntax.KeywordType.OPCODE, 
+			Keyword keyword = new KeywordOpcode( 
 					entry.keyword, 
 					entry.name, 
 					entry.description + "\nSyntax: " + entry.syntax);
 
-			opcodes.put(keyword.keyword, keyword);
+			keywords.put(keyword.getKeyword(), keyword);
 		}
 		
 		for (OpCodeEntry entry : syntaxFile.logicOpcodes)
 		{
-			Syntax.Keyword keyword = new Syntax.Keyword(Syntax.KeywordType.OPCODE, 
+			Keyword keyword = new KeywordOpcode( 
 					entry.keyword, 
 					entry.name, 
 					entry.description + "\nSyntax: " + entry.syntax);
 
-			opcodes.put(keyword.keyword, keyword);
+			keywords.put(keyword.getKeyword(), keyword);
+		}
+		
+		for (OpCodeEntry entry : syntaxFile.fpuOpcodes)
+		{
+			Keyword keyword = new KeywordOpcode( 
+					entry.keyword, 
+					entry.name, 
+					entry.description + "\nSyntax: " + entry.syntax);
+
+			keywords.put(keyword.getKeyword(), keyword);
 		}
 		
 		for (RegisterEntry entry : syntaxFile.registerNames)
 		{
-			Syntax.Keyword namedReg = new Syntax.Keyword(Syntax.KeywordType.REGISTER, 
+			KeywordRegisterName namedReg = new KeywordRegisterName(
 					entry.name, 
 					entry.name, 
 					entry.description);
 			
-			Syntax.Keyword reg = new Syntax.Keyword(Syntax.KeywordType.REGISTER, 
+			KeywordRegisterName reg = new KeywordRegisterName(
 					entry.register, 
 					entry.register, 
 					"Also referenced by: " + entry.name + "\n" + entry.description);
 			
-			registers.put(reg.keyword, reg);
-			registers.put(namedReg.keyword, namedReg);
+			keywords.put(reg.getKeyword(), reg);
+			keywords.put(namedReg.getKeyword(), namedReg);
 		}
 	}
 	
-	public Syntax.Keyword getKeyword(String s)
-	{
-		if (assemblerInstructions.containsKey(s))
-			return assemblerInstructions.get(s);
-		
-		if (opcodes.containsKey(s))
-			return opcodes.get(s);
-		
-		if (registers.containsKey(s))
-			return registers.get(s);
-		
-		return null;
+	public HashMap<String, Keyword> getKeywords() {
+		return keywords;
 	}
 	
-	public HashMap<String, Syntax.Keyword> getAssemblerInstructions() {
-		return assemblerInstructions;
-	}
-	public HashMap<String, Syntax.Keyword> getOpcodes() {
-		return opcodes;
-	}
-	public HashMap<String, Syntax.Keyword> getRegisters() {
-		return registers;
+	public List<Keyword> getKeywordsByType(Class<? extends Keyword> type)
+	{
+		List<Keyword> result = new ArrayList<Keyword>();
+		keywords.values().stream()
+				.filter(k -> k.getClass()==(type))
+				.forEach(k -> result.add(k));
+		
+		return result;
 	}
 	
 
-	private static class AssemblerInstructionEntry
+	private static class DirectiveEntry
 	{
 		public String keyword;
 		public String name;
@@ -164,12 +165,14 @@ public class KeywordBank {
 	
 	private static class SyntaxFile
 	{
-		public AssemblerInstructionEntry[] assemblerInstructions;
+		public DirectiveEntry[] directives;
 		
 		public OpCodeEntry[] arithmeticOpcodes;
 		public OpCodeEntry[] moveOpcodes;
 		public OpCodeEntry[] branchOpcodes;
 		public OpCodeEntry[] logicOpcodes;
+		
+		public OpCodeEntry[] fpuOpcodes;
 		
 		public RegisterEntry[] registerNames;
 	}

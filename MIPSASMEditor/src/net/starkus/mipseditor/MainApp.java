@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -11,9 +12,9 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import net.starkus.mipseditor.assistant.Syntax;
 import net.starkus.mipseditor.model.FileManager;
 import net.starkus.mipseditor.savedata.JSONUtils;
-import net.starkus.mipseditor.syntax.Syntax;
 import net.starkus.mipseditor.view.MainWindowController;
 
 public class MainApp extends Application {
@@ -85,6 +86,12 @@ public class MainApp extends Application {
 
 			window = primaryStage;
 			primaryStage.show();
+			
+			
+			if (!getParameters().getRaw().isEmpty())
+				Platform.runLater(() -> {
+					mainController.handleOpenFile(new File(getParameters().getUnnamed().get(0)));
+				});
 		}
 		catch (IOException e) {
 			e.printStackTrace();

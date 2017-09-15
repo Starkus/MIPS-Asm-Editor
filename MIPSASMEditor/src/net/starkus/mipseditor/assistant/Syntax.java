@@ -1,7 +1,6 @@
-package net.starkus.mipseditor.syntax;
+package net.starkus.mipseditor.assistant;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -13,15 +12,18 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import net.starkus.mipseditor.MainApp;
+import net.starkus.mipseditor.assistant.keyword.Keyword;
+import net.starkus.mipseditor.assistant.keyword.KeywordBank;
+import net.starkus.mipseditor.assistant.keyword.KeywordDirective;
+import net.starkus.mipseditor.assistant.keyword.KeywordOpcode;
+import net.starkus.mipseditor.assistant.keyword.KeywordRegisterName;
 
 
 public class Syntax {
 	
-	private static final KeywordBank keywordBank = new KeywordBank();
-	
 	private static ExecutorService highlightingExecutor;
 
-	private static String ASSEMBLERINSTRUCTION_PATTERN;
+	private static String DIRECTIVE_PATTERN;
 	private static String OPCODE_PATTERN;
 	private static String REGISTERNAME_PATTERN;
 	
@@ -29,6 +31,7 @@ public class Syntax {
     private static final String LITERAL_PATTERN = "0[xX][0-9a-fA-F]+";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String DEFINE_PATTERN = "\\[[^\n]*\\]:";
+    private static final String DEFINECALL_PATTERN = "@(\\w*)\\b";
     private static final String LABEL_PATTERN = "[^\n]+:";
 	
 	private static Pattern PATTERN;
@@ -37,14 +40,9 @@ public class Syntax {
 	public static void initialize()
 	{
 		File syntaxFile = new File(MainApp.class.getResource("syntax.json").getFile());
+		Assistant.loadKeywords(syntaxFile);
 		
-		try {
-			keywordBank.buildFromFile(syntaxFile);
-			buildPatterns();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		buildPatterns();
 		
 		highlightingExecutor = Executors.newSingleThreadExecutor();
 	}
@@ -57,17 +55,50 @@ public class Syntax {
 	
 	private static void buildPatterns()
 	{
-		ASSEMBLERINSTRUCTION_PATTERN = "(\\" + String.join("|\\", keywordBank.getAssemblerInstructions().keySet()) + ")\\b";
-		OPCODE_PATTERN = "\\b(" + String.join("|", keywordBank.getOpcodes().keySet()) + ")\\b";
-		REGISTERNAME_PATTERN = "\\b(" + String.join("|", keywordBank.getRegisters().keySet()) + ")\\b";
+		KeywordBank keywordBank = Assistant.getKeywordBank();
+
+		DIRECTIVE_PATTERN = "(";
+		REGISTERNAME_PATTERN = "\\b(";
+		/* Put opcode with '.'s first, then the rest */
+		String op1 = "\\b(";
+		String op2 = "";
+		
+		/* Iterate through all keywords and put them on the according strings. */
+		for (Keyword k : keywordBank.getKeywords().values())
+		{
+			if (k.getClass().equals(KeywordOpcode.class))
+			{
+				if (k.getKeyword().contains("."))
+					op1 += k.getKeyword().replaceAll("\\.", "\\\\.") + "|";
+				else
+					op2 += k.getKeyword() + "|";
+			}
+			else if (k.getClass().equals(KeywordDirective.class))
+			{
+				DIRECTIVE_PATTERN += "\\" + k.getKeyword() + "|";
+			}
+			else if (k.getClass().equals(KeywordRegisterName.class))
+			{
+				REGISTERNAME_PATTERN += k.getKeyword() + "|";
+			}
+		}
+		
+		OPCODE_PATTERN = op1 + op2.substring(0, op2.length()-1) + ")\\b";
+		
+		DIRECTIVE_PATTERN = DIRECTIVE_PATTERN.substring(0, 
+				DIRECTIVE_PATTERN.length()-1) + ")\\b";
+		
+		REGISTERNAME_PATTERN = REGISTERNAME_PATTERN.substring(0, 
+				REGISTERNAME_PATTERN.length()-1) + ")\\b";
 		
 		PATTERN = Pattern.compile("(?<OPCODE>" + OPCODE_PATTERN + ")"
-						+ "|(?<ASSEMBLERINSTRUCTION>" + ASSEMBLERINSTRUCTION_PATTERN + ")"
+						+ "|(?<DIRECTIVE>" + DIRECTIVE_PATTERN + ")"
 						+ "|(?<REGISTERNAME>" + REGISTERNAME_PATTERN + ")"
 						+ "|(?<COMMENT>" + COMMENT_PATTERN + ")"
 						+ "|(?<STRING>" + STRING_PATTERN + ")"
 						+ "|(?<LITERAL>" + LITERAL_PATTERN + ")"
 						+ "|(?<DEFINE>" + DEFINE_PATTERN + ")"
+						+ "|(?<DEFINECALL>" + DEFINECALL_PATTERN + ")"
 						+ "|(?<LABEL>" + LABEL_PATTERN + ")"
 				);
 	}
@@ -82,12 +113,13 @@ public class Syntax {
 		while (matcher.find())
 		{
 			String styleClass = matcher.group("OPCODE") != null ? "opcode" :
-					matcher.group("ASSEMBLERINSTRUCTION") != null ? "asm-instruction" :
+					matcher.group("DIRECTIVE") != null ? "directive" :
 					matcher.group("REGISTERNAME") != null ? "register-name" :
 					matcher.group("COMMENT") != null ? "comment" :
 					matcher.group("STRING") != null ? "string" :
 					matcher.group("LITERAL") != null ? "literal" :
 					matcher.group("DEFINE") != null ? "define" :
+					matcher.group("DEFINECALL") != null ? "define-call" :
 					matcher.group("LABEL") != null ? "label-s" :
 					null;
 			
@@ -101,57 +133,11 @@ public class Syntax {
 	}
 	
 	
-	public static KeywordBank getKeywordBank() {
-		return keywordBank;
-	}
-	
 	public static Pattern getPattern() {
 		return PATTERN;
 	}
 	
 	public static ExecutorService getHighlightingExecutor() {
 		return highlightingExecutor;
-	}
-	
-	
-	public static enum KeywordType
-	{
-		OPCODE, REGISTER;
-	}
-	
-	public static class Keyword
-	{
-		protected KeywordType type;
-		protected String keyword;
-		protected String name;
-		protected String description;
-		
-		public Keyword(KeywordType type, String keyword, String name, String description)
-		{
-			this.type = type;
-			this.keyword = keyword;
-			this.name = name;
-			this.description = description;
-		}
-		
-		public String getTooltipTitle() {
-			return name;
-		}
-		public String getTooltipBody() {
-			return description;
-		}
-		
-		public KeywordType getType() {
-			return type;
-		}
-		public String getKeyword() {
-			return keyword;
-		}
-		public String getName() {
-			return name;
-		}
-		public String getDescription() {
-			return description;
-		}
 	}
 }

@@ -13,15 +13,15 @@
 
 .label {
 	-fx-font-size: 10pt;
-	-fx-font-family: "PageSans-DemiBold";
-	-fx-font-weight: bold;
+	-fx-font-family: "Lato";
 	-fx-text-fill: white;
 	-fx-opacity: 0.6;
 }
 
 
 .menu-bar {
-    -fx-background-color: derive(-fx-base,20%);
+	-fx-background-color: linear-gradient(to bottom, black, transparent), derive(-fx-base, 20%);
+	-fx-background-insets: 0 0 -12 0, 0;
 }
 
 .context-menu {
@@ -199,7 +199,7 @@
 }
 
 .tab:selected {
-	-fx-background-color: -fx-focus-color;
+	-fx-background-color: rgba(255, 255, 255, 0.25) ;
 	-fx-background-radius: 0;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .tab-header-background {
-	-fx-background-color: linear-gradient(to bottom, black, transparent), derive(-fx-base, 20%);
-	-fx-background-radius: 0;
+	-fx-background-color: linear-gradient(to bottom, black, transparent), linear-gradient(from 0% 0% to 100% 100%, derive(#f22484, -25%), derive(#bc3fdb, -30%));
+	-fx-background-radius: 2px;
 	-fx-background-insets: 8 8 -4 8, 8;
 }

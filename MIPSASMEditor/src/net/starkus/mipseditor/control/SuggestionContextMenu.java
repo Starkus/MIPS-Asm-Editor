@@ -28,7 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Popup;
-import net.starkus.mipseditor.assistant.Assistant;
+import net.starkus.mipseditor.assistant.keyword.Keyword;
 
 public class SuggestionContextMenu extends Popup
 {
@@ -40,10 +40,10 @@ public class SuggestionContextMenu extends Popup
 	
 	private final int maxEntries = 10;
 	
-	private final SelectionModel<String> selectionModel;
+	private final SelectionModel<Keyword> selectionModel;
 	private final IntegerProperty hoverIndex = new SimpleIntegerProperty(1);
 	
-	private final ObservableList<String> entries = FXCollections.observableArrayList();
+	private final ObservableList<Keyword> entries = FXCollections.observableArrayList();
 	private final List<Button> buttonList = new ArrayList<>();
 	
 	private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<>();
@@ -53,7 +53,7 @@ public class SuggestionContextMenu extends Popup
 	{
 		buildLayout();
 		
-		selectionModel = new SingleSelectionModel<String>() {
+		selectionModel = new SingleSelectionModel<Keyword>() {
 			
 			@Override
 			public void selectNext() {
@@ -76,7 +76,7 @@ public class SuggestionContextMenu extends Popup
 			}
 			
 			@Override
-			public void select(String s) {
+			public void select(Keyword s) {
 				if (!entries.contains(s))
 					new NullPointerException("Trying to select an item that's not"
 							+ " in the entries!").printStackTrace();
@@ -101,7 +101,7 @@ public class SuggestionContextMenu extends Popup
 			}
 	
 			@Override
-			protected String getModelItem(int index) {
+			protected Keyword getModelItem(int index) {
 				return entries.get(index);
 			}
 	
@@ -173,9 +173,9 @@ public class SuggestionContextMenu extends Popup
 			selectionModel.select(newv.intValue());
 		});
 		
-		entries.addListener(new ListChangeListener<String>() {
+		entries.addListener(new ListChangeListener<Keyword>() {
 			@Override
-			public void onChanged(javafx.collections.ListChangeListener.Change<? extends String> c) 
+			public void onChanged(javafx.collections.ListChangeListener.Change<? extends Keyword> c) 
 			{
 				vbox.getChildren().clear();
 				
@@ -186,7 +186,7 @@ public class SuggestionContextMenu extends Popup
 				
 				for (int i=0; i < entriesSize; ++i)
 				{
-					buttonList.get(i).setText(entries.get(i));
+					buttonList.get(i).setText(entries.get(i).getKeyword());
 					vbox.getChildren().add(buttonList.get(i));
 				}
 				
@@ -199,11 +199,10 @@ public class SuggestionContextMenu extends Popup
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				
-				String entry = entries.get(newValue.intValue());
+				Keyword entry = entries.get(newValue.intValue());
 				
-				selectedTitle.setText(entry + "\n");
-				
-				selectedDescription.setText(Assistant.getCodeProcessor().getDefines().get(entry).description);
+				selectedTitle.setText(entry.getKeyword() + "\n");
+				selectedDescription.setText(entry.getDescription());
 				
 				for (int i=0; i < maxEntries; ++i) {
 					
@@ -276,11 +275,11 @@ public class SuggestionContextMenu extends Popup
 		return onAction;
 	}
 	
-	public SelectionModel<String> getSelectionModel() {
+	public SelectionModel<Keyword> getSelectionModel() {
 		return selectionModel;
 	}
 	
-	public ObservableList<String> getEntries() {
+	public ObservableList<Keyword> getEntries() {
 		return entries;
 	}
 	

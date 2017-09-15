@@ -16,9 +16,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Popup;
 import net.starkus.mipseditor.assistant.Assistant;
+import net.starkus.mipseditor.assistant.Syntax;
+import net.starkus.mipseditor.assistant.Tooltips;
 import net.starkus.mipseditor.model.FileManager;
-import net.starkus.mipseditor.syntax.Syntax;
-import net.starkus.mipseditor.syntax.Tooltips;
 
 public class MyCodeArea extends CodeArea {
 	

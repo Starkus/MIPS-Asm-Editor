@@ -39,15 +39,22 @@
               </menus>
             </MenuBar>
             <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS" />
-            <Pane fx:id="statusBar" prefWidth="800.0" style="-fx-background-color: derive(-fx-base,20%);">
+            <AnchorPane styleClass="status-bar" VBox.vgrow="NEVER">
                <children>
-                  <Label text="Status bar here">
+                  <HBox alignment="CENTER_RIGHT" prefHeight="25.0" spacing="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Label fx:id="filePathLabel" maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+                        <Separator orientation="VERTICAL" />
+                        <Label fx:id="fileInfoLabel" text="Length: 133 - Lines: 7" HBox.hgrow="SOMETIMES" />
+                        <Separator orientation="VERTICAL" />
+                        <Label fx:id="caretInfoLabel" text="Ln: 7 - Col: 22" HBox.hgrow="SOMETIMES" />
+                     </children>
                      <padding>
-                        <Insets bottom="4.0" left="12.0" right="4.0" top="4.0" />
+                        <Insets bottom="2.0" left="12.0" right="12.0" top="2.0" />
                      </padding>
-                  </Label>
+                  </HBox>
                </children>
-            </Pane>
+            </AnchorPane>
          </children>
       </VBox>
    </children>

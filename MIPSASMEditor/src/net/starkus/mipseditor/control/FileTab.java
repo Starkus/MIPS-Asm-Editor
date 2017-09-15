@@ -34,6 +34,7 @@ public class FileTab extends Tab {
 		setText(file.getName());
 		
 		codeArea = new MyCodeArea(this);
+		codeArea.setAutoScrollOnDragDesired(true);
 		
 		
 		if (currentFile.get().exists())
@@ -78,6 +79,7 @@ public class FileTab extends Tab {
 		
 		Platform.runLater(() -> {
 			codeArea.requestFocus();
+			codeArea.requestFollowCaret();
 		});
 	}
 	
@@ -109,7 +111,7 @@ public class FileTab extends Tab {
 	}
 	
 	
-	public CodeArea getCodeArea() {
+	public MyCodeArea getCodeArea() {
 		return codeArea;
 	}
 	

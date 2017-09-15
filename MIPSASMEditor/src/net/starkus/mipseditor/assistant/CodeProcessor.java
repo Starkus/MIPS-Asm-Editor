@@ -4,33 +4,32 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.time.Duration;
 
 import org.reactfx.EventStreams;
 
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
+import net.starkus.mipseditor.assistant.keyword.KeywordDefine;
 import net.starkus.mipseditor.model.FileManager;
-import net.starkus.mipseditor.syntax.StringUtils;
+import net.starkus.mipseditor.util.StringUtils;
 
 public class CodeProcessor {
 	
 	private final ObservableSet<File> relevantFiles;
-	private final ObservableMap<String, Define> defines;
 	
 	public CodeProcessor()
 	{
 		relevantFiles = FXCollections.observableSet();
 		relevantFiles.addAll(FileManager.getOpenfiles().keySet());
 		
-		defines = FXCollections.observableHashMap();
-		
 		EventStreams.changesOf(FileManager.getOpenfiles())
-				.filter(ch -> !ch.getValueAdded().equals(ch.getValueRemoved()))
+				.filter(ch -> ch.getValueAdded() == null || 
+						!ch.getValueAdded().equals(ch.getValueRemoved()))
 				.successionEnds(Duration.ofMillis(1000))
 				.supplyTask(this::process)
 				.subscribe(e -> {});
@@ -78,14 +77,17 @@ public class CodeProcessor {
 				nowOccurrence += 10; // ".include" is 8 characters long, plus 2.
 				
 				String filename = StringUtils.getWordFromIndex(source, nowOccurrence);
-				filename = filename.replaceAll("\"", "");
 				
-				File dependencyFile = new File(file.getParentFile(), filename);
+				if (filename != null)
+				{
+					filename = filename.replaceAll("\"", "");
+					File dependencyFile = new File(file.getParentFile(), filename);
+					
+					if (dependencyFile.exists())
+						relevantFiles.add(dependencyFile);
+				}
 				
 				lastOccurrence = nowOccurrence;
-				
-				if (dependencyFile.exists())
-					relevantFiles.add(dependencyFile);
 			}
 		}
 	}
@@ -99,7 +101,12 @@ public class CodeProcessor {
 		{
 			BufferedReader reader;
 			try {
-				reader = new BufferedReader(new FileReader(f));
+				if (FileManager.getOpenfiles().containsKey(f))
+					reader = new BufferedReader(new StringReader(FileManager.getOpenfiles().get(f)));
+				
+				else
+					reader = new BufferedReader(new FileReader(f));
+				
 				String line;
 				
 				while ((line = reader.readLine()) != null)
@@ -121,13 +128,13 @@ public class CodeProcessor {
 					
 					if (line.matches("\\[[^\n]*\\]:[^\n]*"))
 					{
-						Define d = new Define(
+						KeywordDefine d = new KeywordDefine(
 								line.substring(line.indexOf('[') + 1, line.indexOf(']')),
 								line.substring(line.indexOf("]: ") + 3, line.length()),
 								description
 							);
 						
-						defines.put(d.name, d);
+						Assistant.getKeywordBank().getKeywords().put(d.getKeyword(), d);
 					}
 				}
 				
@@ -135,26 +142,6 @@ public class CodeProcessor {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-	
-	
-	public ObservableMap<String, Define> getDefines() {
-		return defines;
-	}
-	
-	
-	public class Define
-	{
-		public final String name;
-		public final String description;
-		public final String value;
-		
-		public Define(String name, String value, String description)
-		{
-			this.name = name;
-			this.value = value;
-			this.description = description;
 		}
 	}
 }

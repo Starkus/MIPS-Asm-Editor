@@ -7,6 +7,11 @@
 	-fx-font-size: 11pt;
 }
 
+.status-bar {
+	-fx-background-color: linear-gradient(to top, black, transparent), derive(-fx-base, 20%);
+	-fx-background-insets: -12 0 0 0, 0;
+}
+
 .caret {
 	-fx-stroke: white;
 }
@@ -40,7 +45,7 @@
 	-fx-fill: white;
 }
 
-.asm-instruction {
+.directive {
 	-fx-fill: #ff7728;
 }
 
@@ -68,9 +73,14 @@
 }
 
 .label-s {
-	-fx-fill: gold;
+	-fx-fill: #22eaf4;
 }
 
 .define {
 	-fx-fill: #9bf442;
+}
+
+.define-call {
+	-fx-fill: gold;
+	-fx-font-style: italic;
 }

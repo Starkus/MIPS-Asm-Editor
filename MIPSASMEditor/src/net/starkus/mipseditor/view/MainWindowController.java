@@ -4,21 +4,26 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import net.starkus.mipseditor.MainApp;
+import net.starkus.mipseditor.control.AlertWrapper;
 import net.starkus.mipseditor.control.FileTab;
+import net.starkus.mipseditor.control.MyCodeArea;
 import net.starkus.mipseditor.model.FileManager;
 import net.starkus.mipseditor.savedata.RecentFileHistory;;
 
@@ -53,6 +58,14 @@ public class MainWindowController {
 	private MenuItem undoCmd;
 	@FXML
 	private MenuItem redoCmd;
+	
+
+	@FXML
+	private Label filePathLabel;
+	@FXML
+	private Label fileInfoLabel;
+	@FXML
+	private Label caretInfoLabel;
 	
 	
 	private MenuItem[] initialFileMenu;	
@@ -141,6 +154,50 @@ public class MainWindowController {
 				}
 			}
 		});
+		
+		currentTabProperty().addListener((obs, oldv, newv) -> {
+			
+			if (newv == null)
+			{
+				filePathLabel.setText("");
+				
+				caretInfoLabel.textProperty().unbind();
+				caretInfoLabel.setText("");
+				
+				return;
+			}
+			
+			FileTab fileTab = (FileTab) newv;
+			
+			File file = ((FileTab)newv).getFile();
+			filePathLabel.setText(file == null ? "" : file.getAbsolutePath());
+			
+			
+			/* File info */
+			fileInfoLabel.textProperty().bind(Bindings.createObjectBinding(() -> {
+				
+				String code = fileTab.getCodeArea().getText();
+				int lines = code.split("\n", -1).length;
+				
+				return "Lenght: " + code.length() + " - Lines: " + lines;
+				
+			}, fileTab.getCodeArea().textProperty()));
+			
+			
+			/* Caret */
+			caretInfoLabel.textProperty().bind(Bindings.createObjectBinding(() -> {
+				
+				MyCodeArea codeArea = fileTab.getCodeArea();
+				
+				int pos = codeArea.getCaretPosition();
+				int line = codeArea.getText().substring(0, pos).split("\n", -1).length;
+				
+				int column = codeArea.getCaretColumn();
+				
+				return "Pos: " + pos + " - Line: " + line + " - Col: " + column;
+				
+			}, fileTab.getCodeArea().caretPositionProperty()));
+		});
 	}
 	
 	
@@ -228,6 +285,17 @@ public class MainWindowController {
 	{
 		if (file != null)
 		{
+			if (!file.exists() || file.isDirectory())
+			{
+				AlertWrapper alert = new AlertWrapper(AlertType.ERROR)
+						.setTitle("File not found!")
+						.setHeaderText("The file " + file.getName() + " doesn't exist!")
+						.setContentText(file.getAbsolutePath());
+				
+				alert.showAndWait();
+				return;
+			}
+			
 			if (FileManager.getOpenfiles().keySet().contains(file))
 			{
 				tabPane.getSelectionModel().select(tabFromFile(file));

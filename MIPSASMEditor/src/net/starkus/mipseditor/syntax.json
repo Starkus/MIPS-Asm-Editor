@@ -1,5 +1,5 @@
 {
-	"assemblerInstructions": [
+	"directives": [
 		{
 			"keyword": ".include",
 			"name": "Include",
@@ -124,49 +124,49 @@
 			"keyword": "BEQ",
 			"name": "Branch if equal",
 			"description": "Branch if both registers are equal.",
-			"syntax": "BEQ RS, RT, Offset"
+			"syntax": "BEQ RS, RT, Label"
 		},
 		{
 			"keyword": "BGEZ",
 			"name": "Branch if greater or equal to zero",
 			"description": "Branch if the register is greater or equal to zero.",
-			"syntax": "BGEZ RS, Offset"
+			"syntax": "BGEZ RS, Label"
 		},
 		{
 			"keyword": "BGEZAL",
 			"name": "Branch if greater or equal to zero and link",
 			"description": "Branch if the register is greater or equal to zero and returns in R31.",
-			"syntax": "BGEZAL RS, Offset"
+			"syntax": "BGEZAL RS, Label"
 		},
 		{
 			"keyword": "BGTZ",
 			"name": "Branch if greater than zero",
 			"description": "Branch if the register is greater than zero.",
-			"syntax": "BGTZ RS, Offset"
+			"syntax": "BGTZ RS, Label"
 		},
 		{
 			"keyword": "BLEZ",
 			"name": "Branch if less or equal to zero",
 			"description": "Branch if the register is less or equal to zero.",
-			"syntax": "BLEZ RS, Offset"
+			"syntax": "BLEZ RS, Label"
 		},
 		{
 			"keyword": "BLTZ",
 			"name": "Branch if less than zero",
 			"description": "Branch if the register is less than zero.",
-			"syntax": "BLTZ RS, Offset"
+			"syntax": "BLTZ RS, Label"
 		},
 		{
 			"keyword": "BLTZAL",
 			"name": "Branch if less than zero and link",
 			"description": "Branch if the register is less than zero and returns in R31.",
-			"syntax": "BLTZAL RS, Offset"
+			"syntax": "BLTZAL RS, Label"
 		},
 		{
 			"keyword": "BNE",
 			"name": "Branch if not equal",
 			"description": "Branch if the registers are not equal.",
-			"syntax": "BNE RS, RT, Offset"
+			"syntax": "BNE RS, RT, Label"
 		},
 		{
 			"keyword": "J",
@@ -295,6 +295,104 @@
 			"name": "System call",
 			"description": "Generates a software interrupt.",
 			"syntax": "SYSCALL"
+		}
+	],
+	
+	"fpuOpcodes" : [
+	/* Floats (words */
+	/* Arithmetic */
+		{
+			"keyword": "ADD.S",
+			"name": "Add single precission",
+			"description": "Add two FP registers.",
+			"syntax": "ADD.S FD, FS, FT"
+		},
+		{
+			"keyword": "SUB.S",
+			"name": "Subtract single precission",
+			"description": "Substract two FP registers.",
+			"syntax": "SUB.S FD, FS, FT"
+		},
+		{
+			"keyword": "MUL.S",
+			"name": "Multiply single precission",
+			"description": "Multiplies source by target.",
+			"syntax": "MULT.S FD, FS, FT"
+		},
+		{
+			"keyword": "DIV.S",
+			"name": "Divide single precission",
+			"description": "Divides source by target.",
+			"syntax": "DIV.S FD, FS, FT"
+		},
+		{
+			"keyword": "ABS.S",
+			"name": "Absolute single precission",
+			"description": "Compute absolute value.",
+			"syntax": "ABS.S FD, FS"
+		},
+		{
+			"keyword": "NEG.S",
+			"name": "Negative single precission",
+			"description": "Compute negative value.",
+			"syntax": "NEG.S FD, FS"
+		},
+		/* Data movement */
+		{
+			"keyword": "LWC1",
+			"name": "Load word coprocessor 1",
+			"description": "Load word into coprocessor 1 (FPU).",
+			"syntax": "LWC1 RT, Offset(RS)"
+		},
+		{
+			"keyword": "SWC1",
+			"name": "Save word coprocessor 1",
+			"description": "Save word into coprocessor 1 (FPU).",
+			"syntax": "SWC1 RT, Offset(RS)"
+		},
+		{
+			"keyword": "MFC1",
+			"name": "Move from coprocessor 1",
+			"description": "Move value from FP register into RD.",
+			"syntax": "MFC1 RD, FS"
+		},
+		{
+			"keyword": "MTC1",
+			"name": "Move to coprocessor 1",
+			"description": "Move value from RS into FP register.",
+			"syntax": "MFLO RS, FD"
+		},
+		/* Conditionals */
+		{
+			"keyword": "C.EQ.S",
+			"name": "Coprocessor equal single precission",
+			"description": "Code = FS == FT.",
+			"syntax": "C.EQ.S FS, FT"
+		},
+		{
+			"keyword": "C.LE.S",
+			"name": "Coprocessor less or equal single precission",
+			"description": "Code = FS <= FT.",
+			"syntax": "C.LE.S FS, FT"
+		},
+		{
+			"keyword": "C.LT.S",
+			"name": "Coprocessor less than single precission",
+			"description": "Code = FS < FT.",
+			"syntax": "C.LT.S FS, FT"
+		},
+		/* Branches */
+		{
+			"keyword": "BC1F",
+			"name": "Branch coprocessor 1 if false",
+			"description": "If code == 0 jump to label. Code is set by conditionals.",
+			"syntax": "BC1F Label"
+		},
+		{
+			"keyword": "BC1T",
+			"name": "Branch coprocessor 1 if true",
+			"description": "If code == 1 jump to label. Code is set by conditionals.",
+			"syntax": "BC1T Label"
 		}
 	],
 	
