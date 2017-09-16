@@ -2,6 +2,7 @@ package net.starkus.mipseditor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,6 +13,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import net.starkus.mipseditor.assistant.Syntax;
 import net.starkus.mipseditor.model.FileManager;
 import net.starkus.mipseditor.savedata.JSONUtils;
@@ -41,15 +43,16 @@ public class MainApp extends Application {
 			AnchorPane pane = (AnchorPane) loader.load();
 			
 			Scene scene = new Scene(pane);
-			scene.getStylesheets().add(MainApp.class.getResource("Flatus.css").toExternalForm());
-			scene.getStylesheets().add(MainApp.class.getResource("GeneralStyling.css").toExternalForm());
+			scene.getStylesheets().add(getResourcePath() + "Flatus.css");
+			scene.getStylesheets().add(getResourcePath() + "GeneralStyling.css");
 			
+			primaryStage.initStyle(StageStyle.UNIFIED);
 			primaryStage.setScene(scene);
 			primaryStage.setTitle(appName);
 			primaryStage.setMinWidth(700);
 			primaryStage.setMinHeight(450);
 			
-			primaryStage.getIcons().add(new Image(getClass().getResource("icon.png").toExternalForm()));
+			primaryStage.getIcons().add(new Image(getResourceAsStream("icon.png")));
 			
 			mainController = loader.getController();
 			primaryStage.setOnCloseRequest(e -> {
@@ -97,6 +100,30 @@ public class MainApp extends Application {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	public static String getResourcePath()
+	{
+		return "/net/starkus/mipseditor/resources/";
+	}
+	
+	public static InputStream getResourceAsStream(String name)
+	{
+		return MainApp.class.getResourceAsStream(getResourcePath() + name);
+	}
+	
+	public static String getResourceAsString(String name) throws IOException
+	{
+		InputStream is = getResourceAsStream(name);
+		
+		byte[] b = new byte[is.available()];
+		is.read(b);
+		
+		String s = new String(b);
+		
+		return s;
+	}
+	
 	
 	@Override
 	public void stop() throws Exception {

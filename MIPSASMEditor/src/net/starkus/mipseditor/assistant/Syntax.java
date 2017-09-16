@@ -1,6 +1,6 @@
 package net.starkus.mipseditor.assistant;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -39,8 +39,15 @@ public class Syntax {
 	
 	public static void initialize()
 	{
-		File syntaxFile = new File(MainApp.class.getResource("syntax.json").getFile());
-		Assistant.loadKeywords(syntaxFile);
+		try
+		{
+			Assistant.loadKeywords(MainApp.getResourceAsString("syntax.json"));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 		buildPatterns();
 		

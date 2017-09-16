@@ -1,8 +1,5 @@
 package net.starkus.mipseditor.assistant;
 
-import java.io.File;
-import java.io.IOException;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Bounds;
@@ -52,14 +49,9 @@ public class Assistant {
 	}
 	
 	
-	public static void loadKeywords(File file)
+	public static void loadKeywords(String res)
 	{
-		try {
-			keywordBank.buildFromFile(file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		keywordBank.buildFromString(res);
 	}
 	
 	

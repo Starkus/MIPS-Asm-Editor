@@ -1,9 +1,5 @@
 package net.starkus.mipseditor.assistant.keyword;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,30 +16,14 @@ public class KeywordBank {
 		
 	}
 	
-	public KeywordBank(File file)
+	public KeywordBank(String text)
 	{
-		try {
-			buildFromFile(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		buildFromString(text);
 	}
 	
 	
-	public void buildFromFile(File file) throws IOException
+	public void buildFromString(String text)
 	{
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		
-		String text = "";
-		String currentLine;
-		while ((currentLine = reader.readLine()) != null)
-		{
-			text += currentLine;
-		}
-		
-		reader.close();
-		
-		
 		Gson gson = new Gson();
 		
 		SyntaxFile syntaxFile = gson.fromJson(text, SyntaxFile.class);
