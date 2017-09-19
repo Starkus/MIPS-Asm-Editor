@@ -87,14 +87,11 @@ public class Assistant {
 		if (writing.startsWith("@"))
 		{
 			variableSuggestions(writing);
-			return;
 		}
 		
-		if (writing.matches("[A-Z]+")) // starts with uppercase
+		else if (writing.matches("[A-Z]+")) // starts with uppercase
 		{
-			System.out.println("!");
 			opcodeSuggestions(writing);
-			return;
 		}
 	}
 	

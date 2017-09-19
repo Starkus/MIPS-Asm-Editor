@@ -1,0 +1,47 @@
+.code-area .text {
+	-fx-fill: white;
+}
+
+.code-area .backlight {
+	-rtfx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.code-area .opcode {
+	-fx-fill: #ea236c;
+	-fx-font-weight: bold;
+}
+
+.code-area .directive {
+	-fx-fill: #ff7728;
+}
+
+.code-area .register-name {
+	-fx-fill: #2eaf07;
+	-fx-font-weight: bold;
+}
+
+.code-area .comment {
+	-fx-fill: #777777;
+	-fx-font-style: italic;
+}
+
+.code-area .string {
+	-fx-fill: #ffc700;
+}
+
+.code-area .literal {
+	-fx-fill: #8bc6e0;
+}
+
+.code-area .label-s {
+	-fx-fill: #4286f4;
+}
+
+.code-area .define {
+	-fx-fill: #9bf442;
+}
+
+.code-area .define-call {
+	-fx-fill: gold;
+	-fx-font-style: italic;
+}

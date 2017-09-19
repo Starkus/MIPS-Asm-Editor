@@ -4,14 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import insidefx.undecorator.UndecoratorScene;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.starkus.mipseditor.assistant.Syntax;
@@ -42,17 +43,20 @@ public class MainApp extends Application {
 			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/MainWindow.fxml"));
 			AnchorPane pane = (AnchorPane) loader.load();
 			
-			Scene scene = new Scene(pane);
-			scene.getStylesheets().add(getResourcePath() + "Flatus.css");
+			UndecoratorScene scene = new UndecoratorScene(primaryStage, pane);
+			scene.setFill(Color.TRANSPARENT);
+			scene.addStylesheet(getResourcePath() + "Window.css");			
+			scene.getStylesheets().add(getResourcePath() + "Flatus.css");	
+			scene.getStylesheets().add(getResourcePath() + "CodeArea.css");
 			scene.getStylesheets().add(getResourcePath() + "GeneralStyling.css");
 			
-			primaryStage.initStyle(StageStyle.UNIFIED);
-			primaryStage.setScene(scene);
+			primaryStage.initStyle(StageStyle.TRANSPARENT);
 			primaryStage.setTitle(appName);
 			primaryStage.setMinWidth(700);
 			primaryStage.setMinHeight(450);
+			primaryStage.setScene(scene);
 			
-			primaryStage.getIcons().add(new Image(getResourceAsStream("icon.png")));
+			primaryStage.getIcons().setAll(new Image(getResourceAsStream("icon.png")));
 			
 			mainController = loader.getController();
 			primaryStage.setOnCloseRequest(e -> {

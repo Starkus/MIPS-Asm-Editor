@@ -11,6 +11,8 @@
    <children>
       <VBox prefHeight="650.0" prefWidth="800.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
+            <AnchorPane style="-fx-background-color: derive(-fx-base, 20%);" prefHeight="32.0" VBox.vgrow="NEVER">
+            </AnchorPane>
             <MenuBar>
               <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">

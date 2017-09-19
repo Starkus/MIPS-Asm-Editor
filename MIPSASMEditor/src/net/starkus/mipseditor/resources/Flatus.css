@@ -3,8 +3,6 @@
 	
 	-fx-base: #1c2123;
 	-fx-focus-color: #138fd6;
-	
-	-secondary-color: -fx-focus-color;
 }
 
 .background {

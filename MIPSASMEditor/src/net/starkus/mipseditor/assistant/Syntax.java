@@ -1,8 +1,10 @@
 package net.starkus.mipseditor.assistant;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -15,6 +17,7 @@ import net.starkus.mipseditor.MainApp;
 import net.starkus.mipseditor.assistant.keyword.Keyword;
 import net.starkus.mipseditor.assistant.keyword.KeywordBank;
 import net.starkus.mipseditor.assistant.keyword.KeywordDirective;
+import net.starkus.mipseditor.assistant.keyword.KeywordLabel;
 import net.starkus.mipseditor.assistant.keyword.KeywordOpcode;
 import net.starkus.mipseditor.assistant.keyword.KeywordRegisterName;
 
@@ -26,6 +29,7 @@ public class Syntax {
 	private static String DIRECTIVE_PATTERN;
 	private static String OPCODE_PATTERN;
 	private static String REGISTERNAME_PATTERN;
+    private static String LABELCALL_PATTERN;
 	
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
     private static final String LITERAL_PATTERN = "0[xX][0-9a-fA-F]+";
@@ -60,12 +64,13 @@ public class Syntax {
 	}
 	
 	
-	private static void buildPatterns()
+	public static void buildPatterns()
 	{
 		KeywordBank keywordBank = Assistant.getKeywordBank();
 
 		DIRECTIVE_PATTERN = "(";
 		REGISTERNAME_PATTERN = "\\b(";
+		LABELCALL_PATTERN = "";
 		/* Put opcode with '.'s first, then the rest */
 		String op1 = "\\b(";
 		String op2 = "";
@@ -88,6 +93,10 @@ public class Syntax {
 			{
 				REGISTERNAME_PATTERN += k.getKeyword() + "|";
 			}
+			else if (k.getClass().equals(KeywordLabel.class))
+			{
+				LABELCALL_PATTERN += k.getKeyword() + "|";
+			}
 		}
 		
 		OPCODE_PATTERN = op1 + op2.substring(0, op2.length()-1) + ")\\b";
@@ -98,6 +107,10 @@ public class Syntax {
 		REGISTERNAME_PATTERN = REGISTERNAME_PATTERN.substring(0, 
 				REGISTERNAME_PATTERN.length()-1) + ")\\b";
 		
+		if (!LABELCALL_PATTERN.isEmpty())
+		LABELCALL_PATTERN = LABELCALL_PATTERN.substring(0, 
+				LABELCALL_PATTERN.length()-1);
+		
 		PATTERN = Pattern.compile("(?<OPCODE>" + OPCODE_PATTERN + ")"
 						+ "|(?<DIRECTIVE>" + DIRECTIVE_PATTERN + ")"
 						+ "|(?<REGISTERNAME>" + REGISTERNAME_PATTERN + ")"
@@ -107,15 +120,29 @@ public class Syntax {
 						+ "|(?<DEFINE>" + DEFINE_PATTERN + ")"
 						+ "|(?<DEFINECALL>" + DEFINECALL_PATTERN + ")"
 						+ "|(?<LABEL>" + LABEL_PATTERN + ")"
+						+ "|(?<LABELCALL>" + LABELCALL_PATTERN + ")"
 				);
 	}
 	
 	
-	public static StyleSpans<Collection<String>> computeHighlighting(String code)
+	public static StyleSpans<Collection<String>> computeHighlighting(String code, int caret)
 	{
+		return computeHighlighting(0, -1, code, caret);
+	}
+	
+	public static StyleSpans<Collection<String>> computeHighlighting(int start, int end, String code, int caret)
+	{
+		code = code.substring(start);
+		caret -= start;
+		
 		Matcher matcher = PATTERN.matcher(code);
-		int lastKwEnd = 0; // ?
+		int lastKeywordEnd = 0;
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+
+		if (end != -1)
+		{
+			matcher.region(0, end - start);
+		}
 		
 		while (matcher.find())
 		{
@@ -128,14 +155,31 @@ public class Syntax {
 					matcher.group("DEFINE") != null ? "define" :
 					matcher.group("DEFINECALL") != null ? "define-call" :
 					matcher.group("LABEL") != null ? "label-s" :
+					matcher.group("LABELCALL") != null ? "label-s" :
 					null;
 			
-			spansBuilder.add(Collections.singleton("normal-code"), matcher.start() - lastKwEnd);
-			spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
-			lastKwEnd = matcher.end();
+
+			spansBuilder.add(Collections.emptyList(), matcher.start() - lastKeywordEnd);
+			
+			
+			if (matcher.start() < caret && caret <= matcher.end())
+			{
+				List<String> styleClasses = new ArrayList<>();
+				styleClasses.add(styleClass);
+				styleClasses.add("backlight");
+				spansBuilder.add(styleClasses, caret - matcher.start());
+				
+				spansBuilder.add(Collections.singleton(styleClass), matcher.end() - caret);
+			}
+			else
+			{
+				int length = matcher.end() - matcher.start();
+				spansBuilder.add(Collections.singleton(styleClass), length);
+			}
+			
+			lastKeywordEnd = matcher.end();
 		}
 		
-		spansBuilder.add(Collections.singleton("normal-code"), code.length() - lastKwEnd);
 		return spansBuilder.create();
 	}
 	

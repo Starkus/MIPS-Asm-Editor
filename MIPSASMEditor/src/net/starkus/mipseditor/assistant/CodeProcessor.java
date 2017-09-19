@@ -15,6 +15,7 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 import net.starkus.mipseditor.assistant.keyword.KeywordDefine;
+import net.starkus.mipseditor.assistant.keyword.KeywordLabel;
 import net.starkus.mipseditor.model.FileManager;
 import net.starkus.mipseditor.util.StringUtils;
 
@@ -61,6 +62,8 @@ public class CodeProcessor {
 	{
 		checkDependancies();
 		makeDefineList();
+		
+		Syntax.buildPatterns();
 		
 		return null;
 	}
@@ -135,6 +138,18 @@ public class CodeProcessor {
 							);
 						
 						Assistant.getKeywordBank().getKeywords().put(d.getKeyword(), d);
+					}
+					
+					else if (line.endsWith(":"))
+					{
+						String label = line.substring(0, line.length()-1);
+						
+						KeywordLabel l = new KeywordLabel(
+								label, 
+								label, 
+								"Label defined in " + f.getName());
+						
+						Assistant.getKeywordBank().getKeywords().put(label, l);
 					}
 				}
 				

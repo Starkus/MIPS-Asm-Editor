@@ -5,9 +5,9 @@ import java.util.Optional;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import net.starkus.mipseditor.MainApp;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
-import net.starkus.mipseditor.MainApp;
 
 public class AlertWrapper {
 	

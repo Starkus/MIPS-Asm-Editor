@@ -104,7 +104,7 @@ public class StringUtils {
 	
 	public static int endOfWord(String str, int index)
 	{
-		int endIndex = 0;
+		int endIndex = str.length();
 		
 		for (int i = index; i < str.length() - 1; i++)
 		{
@@ -118,6 +118,22 @@ public class StringUtils {
 		}
 		
 		return endIndex;
+	}
+
+	public static int startOfLine(String str, int index)
+	{
+		if (index > str.length())
+			return -1;
+		
+		for (int i = index - 1; i > 0; i--)
+		{
+			if (str.charAt(i) == '\n')
+			{
+				return i;
+			}
+		}
+		
+		return 0;
 	}
 	
 	
