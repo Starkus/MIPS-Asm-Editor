@@ -157,8 +157,8 @@ public class SuggestionContextMenu extends Popup
 				hoverIndex.set(_i);
 			});
 			
-			b.setOnAction(e -> {
-				onAction.get().handle(e);
+			b.setOnMouseClicked(e -> {
+				onAction.get().handle(new ActionEvent());
 				hide();
 			});
 			
@@ -235,6 +235,13 @@ public class SuggestionContextMenu extends Popup
 					hide();
 					e.consume();
 				}
+				break;
+				
+			case SPACE:
+				entries.clear();
+				hide();
+				
+				e.consume();
 				break;
 				
 			case UP:

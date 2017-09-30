@@ -6,75 +6,63 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.control.Tab;
-import net.starkus.mipseditor.model.FileManager;
+import javafx.scene.layout.AnchorPane;
+import net.starkus.mipseditor.file.FileIOHelper;
+import net.starkus.mipseditor.file.LoadedFileOpen;
 
 public class FileTab extends Tab {
 	
-	private ObjectProperty<File> currentFile;
+	private final LoadedFileOpen owner;
+	private ReadOnlyObjectProperty<File> fileProperty;
 	
 	private VirtualizedScrollPane<CodeArea> scrollPane;
 	private MyCodeArea codeArea;
 	
-	private final BooleanProperty dirty = new SimpleBooleanProperty(); 
 	
-	
-	public FileTab(File file)
+	public FileTab(LoadedFileOpen owner, ReadOnlyObjectProperty<File> fileProperty)
 	{
-		currentFile = new SimpleObjectProperty<File>(file);
-		
-		setText(file.getName());
+		this.owner = owner;
+		this.fileProperty = fileProperty;
+
 		
 		codeArea = new MyCodeArea(this);
 		codeArea.setAutoScrollOnDragDesired(true);
-		
-		
-		if (currentFile.get().exists())
-			codeArea.replaceText(FileManager.getOpenfiles().get(file));
-		
-		
-		currentFile.addListener((obs, oldv, newv) -> {
+
+		fileProperty.addListener((obs, oldv, newv) -> {
 			setText(newv == null ? "Untitled" : newv.getName());
 		});
 		
 		
-		codeArea.textProperty().addListener((obs, oldv, newv) -> {
-			FileManager.getOpenfiles().replace(getFile(), newv);
-		});
+		// Init value
+		File file = fileProperty.get();
 		
-		/* Dirty */
-		codeArea.textProperty().addListener((obs, oldv, newv) -> dirty.set(true));
-		
-		dirty.addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				if (newValue && !getText().endsWith("*"))
-					setText(getText() + "*");
-				else if (!newValue && getText().endsWith("*"))
-					setText(getText().substring(0, getText().length()-1));
+		if (file != null)
+		{
+			setText(file.getName());
+			
+			if (fileProperty.get() != null)
+			{
+				codeArea.replaceText(FileIOHelper.readFile(file));
+				codeArea.getUndoManager().forgetHistory();
 			}
-		});
-		
-		dirty.set(!currentFile.get().exists());
-		
-		this.setOnCloseRequest(e -> {
-			
-			if (requestClose()) // requestClose() returns true if should close
-				FileManager.closeFile(getFile());
-			
-			e.consume(); // Someone else is in charge of closing tabs!
-		});
+		}
+		else
+		{
+			setText("Untitled");
+		}
 
 		scrollPane = new VirtualizedScrollPane<CodeArea>(codeArea);
-		this.setContent(scrollPane);
+		
+		final double margin = 10;
+		AnchorPane.setTopAnchor(scrollPane, margin);
+		AnchorPane.setRightAnchor(scrollPane, margin);
+		AnchorPane.setBottomAnchor(scrollPane, margin);
+		AnchorPane.setLeftAnchor(scrollPane, margin);
+		
+		AnchorPane anchorPane = new AnchorPane(scrollPane);
+		this.setContent(anchorPane);
 		
 		
 		Platform.runLater(() -> {
@@ -84,58 +72,23 @@ public class FileTab extends Tab {
 	}
 	
 	
-	public boolean requestClose()
-	{
-		if (!dirty.get())
-		{
-			return true;
-		}
-		
-		String filename = currentFile == null ? "Untitled" : currentFile.getName();
-		
-		AlertWrapper alert = new AlertWrapper(AlertType.CONFIRMATION)
-				.setTitle(filename + " has changes")
-				.setHeaderText("There are unsaved changes. Do you want to save them?")
-				.setContentText(getFile().getAbsolutePath() + "\nAll unsaved changes will be lost.");
-		alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
-		
-		alert.showAndWait();
-		
-		if (alert.getResult() == ButtonType.YES)
-			FileManager.saveFile(getFile());
-		
-		if (alert.getResult() == ButtonType.CANCEL)
-			return false; // A false return value is used to consume the closing event.
-		
-		return true;
-	}
-	
-	
 	public MyCodeArea getCodeArea() {
 		return codeArea;
 	}
 	
-	public void setFile(File file) {
-		this.currentFile.set(file);
+	public File getFile()
+	{
+		return fileProperty.get();
 	}
 	
-	public File getFile() {
-		return currentFile.get();
+	public ReadOnlyObjectProperty<File> fileProperty()
+	{
+		return fileProperty;
 	}
 	
-	public ObjectProperty<File> fileProperty() {
-		return currentFile;
-	}
 	
-	public void setDirty(boolean f) {
-		dirty.set(f);
-	}
-	
-	public boolean isDirty() {
-		return dirty.get();
-	}
-	
-	public BooleanProperty dirtyProperty() {
-		return dirty;
+	public LoadedFileOpen getOwner()
+	{
+		return owner;
 	}
 }

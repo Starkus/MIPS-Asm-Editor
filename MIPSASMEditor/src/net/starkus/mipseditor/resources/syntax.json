@@ -95,10 +95,28 @@
 			"syntax": "LW RT, Offset(RS)"
 		},
 		{
+			"keyword": "LH",
+			"name": "Load half word",
+			"description": "Load half word from specified address into register.",
+			"syntax": "LH RT, Offset(RS)"
+		},
+		{
+			"keyword": "LHU",
+			"name": "Load half word (unsigned)",
+			"description": "Load half word from specified address into register.",
+			"syntax": "LHU RT, Offset(RS)"
+		},
+		{
 			"keyword": "SB",
 			"name": "Save byte",
 			"description": "Least significant byte from target is stored at specified address.",
 			"syntax": "SB RT, Offset(RS)"
+		},
+		{
+			"keyword": "SH",
+			"name": "Save half word",
+			"description": "Least two significant bytes from target are stored at specified address.",
+			"syntax": "SH RT, Offset(RS)"
 		},
 		{
 			"keyword": "SW",
@@ -361,6 +379,43 @@
 			"name": "Move to coprocessor 1",
 			"description": "Move value from RS into FP register.",
 			"syntax": "MFLO RS, FD"
+		},
+		/* Convert */
+		{
+			"keyword": "CVT.S.D",
+			"name": "Convert double to single",
+			"description": "Convert the double precision value in FS to single and store in FD.",
+			"syntax": "CVT.S.D FS, FD"
+		},
+		{
+			"keyword": "CVT.S.W",
+			"name": "Convert integer to single",
+			"description": "Convert the integer value in FS to single and store in FD.",
+			"syntax": "CVT.S.W FS, FD"
+		},
+		{
+			"keyword": "CVT.D.S",
+			"name": "Convert single to double",
+			"description": "Convert the single precision value in FS to double and store in FD.",
+			"syntax": "CVT.D.S FS, FD"
+		},
+		{
+			"keyword": "CVT.D.W",
+			"name": "Convert integer to double",
+			"description": "Convert the integer value in FS to double and store in FD.",
+			"syntax": "CVT.D.W FS, FD"
+		},
+		{
+			"keyword": "CVT.W.S",
+			"name": "Convert single to integer",
+			"description": "Convert the single precision value in FS to integer and store in FD.",
+			"syntax": "CVT.W.S FS, FD"
+		},
+		{
+			"keyword": "CVT.W.D",
+			"name": "Convert double to integer",
+			"description": "Convert the double precision value in FS to integer and store in FD.",
+			"syntax": "CVT.W.D FS, FD"
 		},
 		/* Conditionals */
 		{
@@ -716,6 +771,11 @@
 			"name": "F32",
 			"register": "R64",
 			"description": "Used for floating-point operations."
+		},
+		{
+			"name": "AT",
+			"register": "R1",
+			"description": "Assembler temporary."
 		}
 	]
 }

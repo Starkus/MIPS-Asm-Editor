@@ -1,41 +1,45 @@
 package net.starkus.mipseditor.assistant;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.reactfx.EventStreams;
 
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 import net.starkus.mipseditor.assistant.keyword.KeywordDefine;
 import net.starkus.mipseditor.assistant.keyword.KeywordLabel;
-import net.starkus.mipseditor.model.FileManager;
+import net.starkus.mipseditor.file.FileManager;
+import net.starkus.mipseditor.file.LoadedFile;
+import net.starkus.mipseditor.file.LoadedFileReference;
 import net.starkus.mipseditor.util.StringUtils;
 
 public class CodeProcessor {
 	
-	private final ObservableSet<File> relevantFiles;
 	
+	private List<LoadedFile> addedLoadedFiles;
+	
+	
+	@SuppressWarnings("unchecked")
 	public CodeProcessor()
-	{
-		relevantFiles = FXCollections.observableSet();
-		relevantFiles.addAll(FileManager.getOpenfiles().keySet());
-		
-		EventStreams.changesOf(FileManager.getOpenfiles())
-				.filter(ch -> ch.getValueAdded() == null || 
-						!ch.getValueAdded().equals(ch.getValueRemoved()))
+	{		
+		EventStreams.changesOf(FileManager.getLoadedfiles())
+				.filter(ch -> {
+					while (ch.next())
+						if (ch.wasAdded() && !ch.getAddedSubList().equals(ch.getRemoved()))
+						{
+							addedLoadedFiles = (List<LoadedFile>) ch.getAddedSubList();
+							return true;
+						}
+					
+					return false;
+				})
 				.successionEnds(Duration.ofMillis(1000))
 				.supplyTask(this::process)
 				.subscribe(e -> {});
 		
-		FileManager.getOpenfiles().addListener(new MapChangeListener<File, String>() {
+		/*FileManager.getLoadedfiles().addListener(new ListChangeListener<File, String>() {
 			@Override
 			public void onChanged(
 					MapChangeListener.Change<? extends File, ? extends String> change) {
@@ -48,31 +52,54 @@ public class CodeProcessor {
 				
 				process();
 			}
-		});
+		});*/
 		
-		relevantFiles.addListener(new SetChangeListener<File>() {
+		/*FileManager.getLoadedfiles().addListener(new ListChangeListener<LoadedFile>() {
+			@SuppressWarnings("unchecked")
 			@Override
-			public void onChanged(Change<? extends File> change) {
-				process();
+			public void onChanged(Change<? extends LoadedFile> change) {
+				while (change.next())
+				{
+					if (change.wasAdded() && !change.getAddedSubList().equals(change.getRemoved()))
+					{
+						addedLoadedFiles = (List<LoadedFile>) change.getAddedSubList();
+						process();
+					}
+				}
 			}
-		});
+		});*/
 	}
 	
 	private Task<Void> process()
 	{
-		checkDependancies();
+		List<LoadedFile> foundDependencies = checkDependancies(addedLoadedFiles);
+		
+		if (foundDependencies.isEmpty())
+			return null;
+		
+		
+		FileManager.getLoadedfiles().addAll(foundDependencies);
 		makeDefineList();
 		
-		Syntax.buildPatterns();
+		SyntaxHighlights.buildPatterns();
 		
 		return null;
 	}
 	
-	private void checkDependancies()
+	private List<LoadedFile> checkDependancies(List<LoadedFile> loadedFiles)
 	{
-		for (File file : FileManager.getOpenfiles().keySet())
+		/*
+		 * This function is meant to read currently open files
+		 * looking for .include commands, look for those included files,
+		 * and repeat the process with them, so to find every referenced
+		 * file.
+		 */
+		
+		List<LoadedFile> foundDependencies = new ArrayList<>();
+		
+		for (LoadedFile loadedFile : loadedFiles)
 		{
-			String source = FileManager.getOpenfiles().get(file);
+			String source = loadedFile.getSource();
 			
 			int nowOccurrence, lastOccurrence = 0;
 			while ((nowOccurrence = source.indexOf(".include", lastOccurrence)) != -1)
@@ -84,15 +111,36 @@ public class CodeProcessor {
 				if (filename != null)
 				{
 					filename = filename.replaceAll("\"", "");
-					File dependencyFile = new File(file.getParentFile(), filename);
+					File file = new File(loadedFile.getFile().getParentFile(), filename);
 					
-					if (dependencyFile.exists())
-						relevantFiles.add(dependencyFile);
+					if (file.exists())
+					{
+						if (FileManager.getLoadedFileFromFile(file) == null) // Not open already
+						{
+							LoadedFileReference dependencyLoadedFile = new LoadedFileReference(file, loadedFile);
+							foundDependencies.add(dependencyLoadedFile);
+						}
+					}
+					else
+					{
+						int line = source.substring(0, nowOccurrence).split("\n").length;
+						
+						System.err.println("Couldn't locate included file");
+						System.err.println("At " + loadedFile.getFile().getName() + ", line " + line);
+					}
 				}
 				
 				lastOccurrence = nowOccurrence;
 			}
 		}
+		
+		if (!foundDependencies.isEmpty())
+		{
+			// Recursive
+			foundDependencies.addAll(checkDependancies(foundDependencies));
+		}
+		
+		return foundDependencies;
 	}
 	
 	private void makeDefineList()
@@ -100,62 +148,47 @@ public class CodeProcessor {
 		String descBuilding = null;
 		String description = null;
 		
-		for (File f : relevantFiles)
+		for (LoadedFile loadedFile : FileManager.getLoadedfiles())
 		{
-			BufferedReader reader;
-			try {
-				if (FileManager.getOpenfiles().containsKey(f))
-					reader = new BufferedReader(new StringReader(FileManager.getOpenfiles().get(f)));
-				
-				else
-					reader = new BufferedReader(new FileReader(f));
-				
-				String line;
-				
-				while ((line = reader.readLine()) != null)
+			for (String line : loadedFile.read().split("\n"))
+			{
+				/* Description (comment above) */
+				if (line.contains("/*") && descBuilding == null)
 				{
-					/* Description (comment above) */
-					if (line.contains("/*") && descBuilding == null)
-					{
-						descBuilding = line.substring(line.indexOf("/*") + 2);
-					}
-					else if (line.contains("*/") && descBuilding != null)
-					{
-						description = descBuilding + "\n" + line.substring(0, line.indexOf("*/"));
-						descBuilding = null;
-					}
-					else if (descBuilding != null)
-					{
-						descBuilding += "\n" + line;
-					}
-					
-					if (line.matches("\\[[^\n]*\\]:[^\n]*"))
-					{
-						KeywordDefine d = new KeywordDefine(
-								line.substring(line.indexOf('[') + 1, line.indexOf(']')),
-								line.substring(line.indexOf("]: ") + 3, line.length()),
-								description
-							);
-						
-						Assistant.getKeywordBank().getKeywords().put(d.getKeyword(), d);
-					}
-					
-					else if (line.endsWith(":"))
-					{
-						String label = line.substring(0, line.length()-1);
-						
-						KeywordLabel l = new KeywordLabel(
-								label, 
-								label, 
-								"Label defined in " + f.getName());
-						
-						Assistant.getKeywordBank().getKeywords().put(label, l);
-					}
+					descBuilding = line.substring(line.indexOf("/*") + 2);
+				}
+				else if (line.contains("*/") && descBuilding != null)
+				{
+					description = descBuilding + "\n" + line.substring(0, line.indexOf("*/"));
+					descBuilding = null;
+				}
+				else if (descBuilding != null)
+				{
+					descBuilding += "\n" + line;
 				}
 				
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+				if (line.matches("\\[[^\n]*\\]:[^\n]*"))
+				{
+					KeywordDefine d = new KeywordDefine(
+							line.substring(line.indexOf('[') + 1, line.indexOf(']')),
+							line.substring(line.indexOf("]: ") + 3, line.length()),
+							description
+						);
+					
+					Assistant.getKeywordBank().getKeywords().put(d.getKeyword(), d);
+				}
+				
+				else if (line.endsWith(":"))
+				{
+					String label = line.substring(0, line.length()-1);
+					
+					KeywordLabel l = new KeywordLabel(
+							label, 
+							label, 
+							"Label defined in " + loadedFile.getFile().getName());
+					
+					Assistant.getKeywordBank().getKeywords().put(label, l);
+				}
 			}
 		}
 	}

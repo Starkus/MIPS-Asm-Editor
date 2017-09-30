@@ -12,7 +12,7 @@ public class Tooltips {
 	
 	public static boolean makeTooltipFromCodeIndex(TextFlow flow, String code, int index)
 	{
-		Matcher matcher = Syntax.getPattern().matcher(code);
+		Matcher matcher = SyntaxHighlights.getPattern().matcher(code);
 		Text title = new Text();
 		Text desc = new Text();
 

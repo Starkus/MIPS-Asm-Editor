@@ -22,7 +22,7 @@ import net.starkus.mipseditor.assistant.keyword.KeywordOpcode;
 import net.starkus.mipseditor.assistant.keyword.KeywordRegisterName;
 
 
-public class Syntax {
+public class SyntaxHighlights {
 	
 	private static ExecutorService highlightingExecutor;
 
@@ -30,6 +30,8 @@ public class Syntax {
 	private static String OPCODE_PATTERN;
 	private static String REGISTERNAME_PATTERN;
     private static String LABELCALL_PATTERN;
+    
+    //private static String selectedWord;
 	
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
     private static final String LITERAL_PATTERN = "0[xX][0-9a-fA-F]+";
@@ -72,7 +74,7 @@ public class Syntax {
 		REGISTERNAME_PATTERN = "\\b(";
 		LABELCALL_PATTERN = "";
 		/* Put opcode with '.'s first, then the rest */
-		String op1 = "\\b(";
+		String op1 = "(?i)\\b(";
 		String op2 = "";
 		
 		/* Iterate through all keywords and put them on the according strings. */
@@ -179,6 +181,10 @@ public class Syntax {
 			
 			lastKeywordEnd = matcher.end();
 		}
+		
+		// rest is empty
+		if (lastKeywordEnd < end - start)
+			spansBuilder.add(Collections.emptyList(), end - start - lastKeywordEnd);
 		
 		return spansBuilder.create();
 	}

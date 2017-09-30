@@ -2,14 +2,13 @@ package net.starkus.mipseditor.view;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.stream.Stream;
+import java.util.List;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -23,7 +22,9 @@ import net.starkus.mipseditor.MainApp;
 import net.starkus.mipseditor.control.AlertWrapper;
 import net.starkus.mipseditor.control.FileTab;
 import net.starkus.mipseditor.control.MyCodeArea;
-import net.starkus.mipseditor.model.FileManager;
+import net.starkus.mipseditor.file.FileManager;
+import net.starkus.mipseditor.file.LoadedFile;
+import net.starkus.mipseditor.file.LoadedFileOpen;
 import net.starkus.mipseditor.savedata.RecentFileHistory;;
 
 
@@ -57,6 +58,12 @@ public class MainWindowController {
 	private MenuItem undoCmd;
 	@FXML
 	private MenuItem redoCmd;
+	
+	
+	@FXML
+	private CheckMenuItem lineNumbersCmd;
+	@FXML
+	private CheckMenuItem lineAddressesCmd;
 	
 
 	@FXML
@@ -104,61 +111,86 @@ public class MainWindowController {
 		redoCmd.setOnAction(e -> getCurrentTab().getCodeArea().redo());
 		//redoCmd.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN));
 		
+		
 		initialFileMenu = fileMenu.getItems().toArray(new MenuItem[0]);
 		makeFileMenu();
 		
 		
-		connectTabsWithFileManager();
+		makeTabSelectionListeners();
 		
-		
-		tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-			@Override
-			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+		/* Status bar info */
+		makeStatusBarBindings();
+	}
+
+
+	private void makeTabSelectionListeners()
+	{
+		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldv, newv) -> 
+		{
+			FileTab fileTab = (FileTab) newv;
+			
+			String title = "";
+			
+			if (fileTab == null)
+				title = MainApp.appName;
 				
-				FileTab fileTab = (FileTab) newValue;
+			else
+			{
+				fileTab.getCodeArea().requestFocus();
 				
-				String title = "";
+				fileTab.textProperty().addListener((obs1, oldv1, newv1) ->
+				{			
+					MainApp.getWindow().setTitle(newv + " - " + MainApp.appName);					
+				});
 				
-				if (fileTab == null || fileTab.getFile() == null)
-					title = MainApp.appName;
-					
-				else
-				{
-					fileTab.getCodeArea().requestFocus();
-					
-					title = fileTab.getFile().getName();
-					
-					if (fileTab.isDirty())
-						title += "*";
-					
-					title += " - " + MainApp.appName;
-				}
-				MainApp.getWindow().setTitle(title);
-				
-				/* Bindings */
-				if (fileTab != null)
-				{
-					saveCmd.disableProperty().bind(Bindings.not(fileTab.dirtyProperty()));
-					undoCmd.disableProperty().bind(Bindings.not(fileTab.getCodeArea().undoAvailableProperty()));
-					redoCmd.disableProperty().bind(Bindings.not(fileTab.getCodeArea().redoAvailableProperty()));
-				}
-				else
-				{
-					saveCmd.disableProperty().unbind();
-					saveCmd.setDisable(true);
-					undoCmd.disableProperty().unbind();
-					undoCmd.setDisable(true);
-					redoCmd.disableProperty().unbind();
-					redoCmd.setDisable(true);
-				}
+				// Immediate update
+				title = fileTab.getText() + " - " + MainApp.appName;
+			}
+			MainApp.getWindow().setTitle(title);
+			
+			
+			lineNumbersCmd.selectedProperty().addListener((obs1, oldv1, newv1) -> 
+					fileTab.getCodeArea().showNumberLines(newv1));
+			
+			lineAddressesCmd.selectedProperty().addListener((obs1, oldv1, newv1) -> 
+					fileTab.getCodeArea().showAddresses(newv1));
+			
+			
+			LoadedFileOpen loadedFile = getCurrentFile();
+			
+			/* Bindings */
+			
+			// Reset
+			saveCmd.disableProperty().unbind();
+			saveCmd.setDisable(true);
+			undoCmd.disableProperty().unbind();
+			undoCmd.setDisable(true);
+			redoCmd.disableProperty().unbind();
+			redoCmd.setDisable(true);
+			
+			if (loadedFile != null)
+			{
+				saveCmd.disableProperty().bind(Bindings.not(loadedFile.dirtyProperty()));
+			}
+			if (fileTab != null)
+			{
+				undoCmd.disableProperty().bind(Bindings.not(fileTab.getCodeArea().undoAvailableProperty()));
+				redoCmd.disableProperty().bind(Bindings.not(fileTab.getCodeArea().redoAvailableProperty()));
 			}
 		});
-		
+	}
+
+
+	private void makeStatusBarBindings()
+	{
 		currentTabProperty().addListener((obs, oldv, newv) -> {
 			
 			if (newv == null)
 			{
 				filePathLabel.setText("");
+				
+				fileInfoLabel.textProperty().unbind();
+				fileInfoLabel.setText("");
 				
 				caretInfoLabel.textProperty().unbind();
 				caretInfoLabel.setText("");
@@ -167,9 +199,9 @@ public class MainWindowController {
 			}
 			
 			FileTab fileTab = (FileTab) newv;
+			LoadedFileOpen loadedFile = getCurrentFile();
 			
-			File file = ((FileTab)newv).getFile();
-			filePathLabel.setText(file == null ? "" : file.getAbsolutePath());
+			filePathLabel.setText(loadedFile == null ? "" : loadedFile.getFile().getAbsolutePath());
 			
 			
 			/* File info */
@@ -200,6 +232,9 @@ public class MainWindowController {
 	}
 	
 	
+	/*
+	 * Make a file menu with all the recent files entries.
+	 */
 	public void makeFileMenu()
 	{
 		fileMenu.getItems().clear();
@@ -223,61 +258,28 @@ public class MainWindowController {
 	}
 	
 	
-	private void connectTabsWithFileManager()
+	public void selectTab(FileTab tab)
 	{
-		FileManager.setOnFileOpened(e -> {
-			
-			FileTab newTab = new FileTab(e.getFile());
-			
-			tabPane.getTabs().add(newTab);
-			tabPane.getSelectionModel().select(newTab);
-		});
-		
-		FileManager.setOnFileClosed(e -> {
-			
-			if (!tabPane.getTabs().remove(tabFromFile(e.getFile())))
-				e.consume();
-		});
-		
-		FileManager.setOnFileSaved(e -> {
-			
-			FileTab tab = tabFromFile(e.getFile());
-			
-			tab.setDirty(false);
-		});
-		
-		FileManager.setOnFilePathChanged(e -> {
-			
-			FileTab tab = tabFromFile(e.getOldFile());
-			
-			tab.setFile(e.getNewFile());
-		});
+		tabPane.getSelectionModel().select(tab);
 	}
 	
 	
-	private FileTab tabFromFile(File file)
+	/*private FileTab tabFromFile(File file)
 	{
-		return (FileTab) tabPane.getTabs().filtered(t -> 
+		FilteredList<Tab> tabs = tabPane.getTabs().filtered(t -> 
 				((FileTab)t).getFile().equals(file)
-				).get(0);
-	}
+				);
+		
+		if (tabs.isEmpty())
+			return null;
+		
+		return (FileTab) tabs.get(0);
+	}*/
 	
 	
 	public void handleNewFile()
 	{
-		File recentDirectory = RecentFileHistory.getRecentFiles().get(0);
-		
-		File file = new File(recentDirectory, "Untitled");
-		
-		/* Ensure unique name */
-		int c = 0;
-		while (FileManager.getOpenfiles().keySet().contains(file))
-		{
-			c++;
-			file = new File(recentDirectory, "Untitled_" + c);
-		}
-		
-		FileManager.openFile(file);
+		FileManager.newFile();
 	}
 	
 	public void handleOpenFile(File file)
@@ -295,11 +297,7 @@ public class MainWindowController {
 				return;
 			}
 			
-			if (FileManager.getOpenfiles().keySet().contains(file))
-			{
-				tabPane.getSelectionModel().select(tabFromFile(file));
-				return;
-			}
+			
 			
 			FileManager.openFile(file);
 		}
@@ -307,36 +305,35 @@ public class MainWindowController {
 	
 	public void handleSaveFile()
 	{
-		File file = getCurrentTab().getFile();
-		
-		FileManager.saveFile(file);
+		LoadedFileOpen loadedFile = getCurrentTab().getOwner();
+		FileManager.saveFile(loadedFile);
 	}
 	
 	public void handleSaveAs()
 	{
-		File file = getCurrentTab().getFile();
-		
-		FileManager.saveFileAs(file);
+		LoadedFileOpen loadedFile = getCurrentTab().getOwner();
+		FileManager.saveFileAs(loadedFile);
 	}
 	
 	public void handleSaveCopy()
 	{
-		File file = getCurrentTab().getFile();
-		
-		FileManager.saveFileCopy(file);
+		LoadedFileOpen loadedFile = getCurrentTab().getOwner();
+		FileManager.saveFileCopy(loadedFile);
 	}
 	
 	public void handleSaveAll()
 	{
-		for (File file : FileManager.getOpenfiles().keySet())
+		for (Tab tab : tabPane.getTabs())
 		{
-			FileManager.saveFile(file);
+			LoadedFileOpen loadedFile = ((FileTab) tab).getOwner();
+			FileManager.saveFile(loadedFile);
 		}
 	}
 	
 	public void handleCloseFile()
 	{
-		FileManager.closeFile(getCurrentTab().getFile());
+		LoadedFileOpen loadedFile = getCurrentTab().getOwner();
+		FileManager.closeFile(loadedFile);
 	}
 	
 	public void handleExit()
@@ -347,11 +344,16 @@ public class MainWindowController {
 	
 	public boolean requestClose()
 	{
-		for (Tab tab : new ArrayList<>(tabPane.getTabs()))
+		List<LoadedFile> loadedFiles = new ArrayList<>(FileManager.getLoadedfiles());
+		
+		for (LoadedFile loadedFile : loadedFiles)
 		{
-			if (((FileTab)tab).requestClose())
-				tabPane.getTabs().remove(tab);
-			else
+			if (loadedFile.getClass().equals(LoadedFileOpen.class) == false)
+				continue;
+			
+			boolean success = FileManager.closeFile(loadedFile);
+			
+			if (!success)
 				return false;
 		}
 		
@@ -359,15 +361,33 @@ public class MainWindowController {
 	}
 	
 	
+	public boolean requestAddTab(FileTab tab)
+	{
+		return tabPane.getTabs().add(tab);
+	}
+	public boolean requestCloseTab(FileTab tab)
+	{
+		return tabPane.getTabs().remove(tab);
+	}
+	
+	
 	public FileTab getCurrentTab() {
 		return (FileTab) tabPane.getSelectionModel().getSelectedItem();
+	}
+	
+	public LoadedFileOpen getCurrentFile()
+	{
+		if (getCurrentTab() == null)
+			return null;
+		
+		return getCurrentTab().getOwner();
 	}
 	
 	public ReadOnlyObjectProperty<Tab> currentTabProperty() {
 		return tabPane.getSelectionModel().selectedItemProperty();
 	}
 	
-	public Stream<Tab> getDirtyTabs() {
+	/*public Stream<Tab> getDirtyTabs() {
 		return tabPane.getTabs().stream().filter(t -> ((FileTab)t).isDirty());
-	}
+	}*/
 }

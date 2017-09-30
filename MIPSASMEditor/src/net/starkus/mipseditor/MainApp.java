@@ -15,8 +15,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import net.starkus.mipseditor.assistant.Syntax;
-import net.starkus.mipseditor.model.FileManager;
+import net.starkus.mipseditor.assistant.SyntaxHighlights;
+import net.starkus.mipseditor.file.FileChangeWatcher;
+import net.starkus.mipseditor.file.FileManager;
 import net.starkus.mipseditor.savedata.JSONUtils;
 import net.starkus.mipseditor.view.MainWindowController;
 
@@ -26,6 +27,8 @@ public class MainApp extends Application {
 	private static MainWindowController mainController;
 	
 	public static final String appName = "MIPS Assembler Editor";
+	
+	private static FileChangeWatcher fileChangeWatcher;
 	
 	
 	public static MainWindowController getMainController()
@@ -37,7 +40,10 @@ public class MainApp extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
-		Syntax.initialize();
+		//fileChangeWatcher = new FileChangeWatcher();
+		//fileChangeWatcher.start();
+		
+		SyntaxHighlights.initialize();
 		
 		try {
 			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/MainWindow.fxml"));
@@ -132,7 +138,7 @@ public class MainApp extends Application {
 	@Override
 	public void stop() throws Exception {
 		
-		Syntax.stop();
+		SyntaxHighlights.stop();
 	}
 	
 	public static void main(String[] args) {
@@ -145,5 +151,11 @@ public class MainApp extends Application {
 
 	public static Stage getWindow() {
 		return window;
+	}
+
+
+	public static FileChangeWatcher getFileChangeWatcher()
+	{
+		return fileChangeWatcher;
 	}
 }

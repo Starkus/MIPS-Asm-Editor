@@ -35,12 +35,13 @@ public class Assistant {
 		});
 		
 		suggestionMenu.setOnAction(e -> {
+			if (!suggestionMenu.isShowing())
+				return;
+			
 			Keyword selected = suggestionMenu.getSelectionModel().getSelectedItem();
 			
 			int sow = StringUtils.startOfWord(codeArea.getText(), codeArea.getCaretPosition());
-			
 			if (codeArea.getText().charAt(sow) == '@') sow++; // FIXME
-			
 			codeArea.selectRange(sow, codeArea.getCaretPosition());
 			
 			//codeArea.selectWord();
@@ -59,11 +60,19 @@ public class Assistant {
 	{
 		KeyCode k = e.getCode();
 		
-		if (!(k.isDigitKey() || k.isLetterKey() || k.isKeypadKey() || k == KeyCode.BACK_SPACE))
+		if (!(k.isDigitKey() || k.isLetterKey() || k.isKeypadKey() || k == KeyCode.BACK_SPACE || k == KeyCode.SPACE))
 			return;
 		
 		String code = codeArea.getText();
 		String word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition());
+		
+		if (k.equals(KeyCode.SPACE))
+		{
+			//word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition()-1);
+			suggestionMenu.getEntries().clear();
+			suggestionMenu.hide();
+			return;
+		}
 		
 		computeSuggestions(word);
 		
@@ -89,7 +98,7 @@ public class Assistant {
 			variableSuggestions(writing);
 		}
 		
-		else if (writing.matches("[A-Z]+")) // starts with uppercase
+		else if (writing.matches("[A-Za-z]+")) // starts with uppercase
 		{
 			opcodeSuggestions(writing);
 		}
@@ -111,7 +120,7 @@ public class Assistant {
 	{
 		for (Keyword k : keywordBank.getKeywordsByType(KeywordOpcode.class))
 		{
-			if (k.getKeyword().startsWith(writing.toUpperCase()))
+			if (k.getKeyword().toUpperCase().startsWith(writing.toUpperCase()))
 				suggestionMenu.getEntries().add(k);
 		}
 	}

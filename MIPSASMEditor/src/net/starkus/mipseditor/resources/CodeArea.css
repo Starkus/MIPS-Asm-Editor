@@ -3,7 +3,7 @@
 }
 
 .code-area .backlight {
-	-rtfx-background-color: rgba(255, 255, 255, 0.1);
+	-rtfx-background-color: rgba(255, 255, 255, 0.05);
 }
 
 .code-area .opcode {

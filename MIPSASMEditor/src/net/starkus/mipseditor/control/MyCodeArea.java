@@ -12,18 +12,14 @@ import org.reactfx.EventStreams;
 
 import javafx.concurrent.Task;
 import javafx.geometry.Point2D;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Popup;
 import net.starkus.mipseditor.assistant.Assistant;
-import net.starkus.mipseditor.assistant.Syntax;
+import net.starkus.mipseditor.assistant.SyntaxHighlights;
 import net.starkus.mipseditor.assistant.Tooltips;
-import net.starkus.mipseditor.model.FileManager;
 import net.starkus.mipseditor.util.StringUtils;
 
 public class MyCodeArea extends CodeArea {
-
-	private final FileTab fileTab;
 
 	private Assistant assistant = new Assistant(this);
 	private Popup popup = new Popup();
@@ -31,13 +27,13 @@ public class MyCodeArea extends CodeArea {
 
 	public MyCodeArea(FileTab fileTab) {
 		super();
-		this.fileTab = fileTab;
 
 		setParagraphGraphicFactory(LineNumberFactory.get(this));
 
 		initInputEvents();
-
 		initTooltipEvents();
+		
+		
 	}
 
 	private void initInputEvents()
@@ -57,35 +53,32 @@ public class MyCodeArea extends CodeArea {
 			}
 		}).subscribe(this::applyHighlighting);
 
-		EventStreams.changesOf(textProperty()).successionEnds(Duration.ofMillis(600))
+		/*EventStreams.changesOf(textProperty()).successionEnds(Duration.ofMillis(600))
 				.supplyTask(this::updateSourceAsync).subscribe(e -> {
-		});
+		});*/
 
-		addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+		setOnKeyPressed(e -> {
 			this.assistant.processKeyPress(e);
 		});
 		
-		/*plainTextChanges().filter(ch -> !ch.getInserted().equals(ch.getRemoved())).addObserver(c -> {
-			
-			int caret = getCaretPosition();
-			int start = StringUtils.startOfLine(getText(), Math.max(0, caret - 50));
-			int end = StringUtils.endOfWord(getText(), Math.min(caret + 50, getText().length()));
-			
-			setStyleSpans(start, Syntax.computeHighlighting(start, end, getText(), caret));
-		});*/
+		plainTextChanges().filter(ch -> !ch.getInserted().equals(ch.getRemoved())).addObserver(c ->
+			updateNearbyHighlights());
 		
-		caretPositionProperty().addListener((obs, oldv, newv) -> {
-			
-			int caret = newv;
-			int start = StringUtils.startOfLine(getText(), Math.max(0, caret - 50));
-			int end = StringUtils.endOfWord(getText(), Math.min(caret + 50, getText().length()));
-			
-			StyleSpans<Collection<String>> nearbySpans = Syntax.computeHighlighting(start, end, getText(), caret);
-			
-			nearbySpans.overlay(getStyleSpans(0, getText().length()), (a, b) -> a);
-			
-			setStyleSpans(start, nearbySpans);
-		});
+		EventStreams.changesOf(caretPositionProperty())
+				.successionEnds(Duration.ofMillis(400))
+				.supplyTask(this::computeHighlightingAsync)
+				.awaitLatest().filterMap(t -> {
+					if (t.isSuccess())
+					{
+						return Optional.of(t.get());
+					}
+					else
+					{
+						t.getFailure().printStackTrace();
+						return Optional.empty();
+					}
+				})
+				.subscribe(this::applyHighlighting);
 	}
 
 	private void initTooltipEvents()
@@ -110,6 +103,21 @@ public class MyCodeArea extends CodeArea {
 			popup.hide();
 		});
 	}
+	
+	public void showNumberLines(boolean f)
+	{
+		if (f)
+			setParagraphGraphicFactory(LineNumberFactory.get(this));
+		else
+			setParagraphGraphicFactory(null);
+	}
+	public void showAddresses(boolean f)
+	{
+		if (f)
+			setParagraphGraphicFactory(LineAddressFactory.get(this));
+		else
+			setParagraphGraphicFactory(null);
+	}
 
 	@Override
 	public void replaceText(String replacement)
@@ -117,7 +125,7 @@ public class MyCodeArea extends CodeArea {
 		/* When replacing whole text, highlight it right away */
 		super.replaceText(replacement);
 
-		applyHighlighting(Syntax.computeHighlighting(getText(), getCaretPosition()));
+		applyHighlighting(SyntaxHighlights.computeHighlighting(getText(), getCaretPosition()));
 	}
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync()
@@ -125,23 +133,35 @@ public class MyCodeArea extends CodeArea {
 		String text = getText();
 		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 			protected StyleSpans<java.util.Collection<String>> call() throws Exception {
-				return Syntax.computeHighlighting(text, getCaretPosition());
+				return SyntaxHighlights.computeHighlighting(text, getCaretPosition());
 			}
 		};
 
-		Syntax.getHighlightingExecutor().execute(task);
+		SyntaxHighlights.getHighlightingExecutor().execute(task);
 		return task;
 	}
-
-	private Task<Void> updateSourceAsync()
+	
+	private void updateNearbyHighlights()
 	{
-		FileManager.getOpenfiles().replace(fileTab.getFile(), getText());
-
-		return null;
+		int caret = getCaretPosition();
+		int start = StringUtils.startOfLine(getText(), Math.max(0, caret - 50));
+		int end = StringUtils.endOfWord(getText(), Math.min(caret + 50, getText().length()));
+		
+		StyleSpans<Collection<String>> nearbySpans = SyntaxHighlights.computeHighlighting(start, end, getText(), caret);
+		
+		try {
+			setStyleSpans(start, nearbySpans);
+		} catch (IllegalStateException e) {
+			//e.printStackTrace();
+		}
 	}
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting)
 	{
-		setStyleSpans(0, highlighting);
+		try {
+			setStyleSpans(0, highlighting);
+		} catch (IllegalStateException e) {
+			//e.printStackTrace();
+		}
 	}
 }
