@@ -48,9 +48,9 @@
     -fx-opacity: 0.9;
 }
 
-.menu .left-container {
+/*.menu .left-container {
     -fx-background-color: black;
-}
+}*/
 
 .text-field {
     -fx-font-size: 12pt;

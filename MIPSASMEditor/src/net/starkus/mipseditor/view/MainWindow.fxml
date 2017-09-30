@@ -6,12 +6,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.Button?>
 
 <AnchorPane prefHeight="650.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.starkus.mipseditor.view.MainWindowController">
    <children>
       <VBox prefHeight="650.0" prefWidth="800.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <AnchorPane style="-fx-background-color: derive(-fx-base, 20%);" prefHeight="32.0" VBox.vgrow="NEVER">
+            <AnchorPane prefHeight="32.0" style="-fx-background-color: derive(-fx-base, 20%);" VBox.vgrow="NEVER">
             </AnchorPane>
             <MenuBar>
               <menus>
@@ -32,6 +34,12 @@
                     <MenuItem fx:id="undoCmd" mnemonicParsing="false" text="Undo" />
                     <MenuItem fx:id="redoCmd" mnemonicParsing="false" text="Redo" />
                   </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="View">
+                	<items>
+                		<CheckMenuItem fx:id="lineNumbersCmd" mnemonicParsing="false" selected="true" text="Line numbers" />
+                		<CheckMenuItem fx:id="lineAddressesCmd" mnemonicParsing="false" selected="false" text="Line addresses" visible="false" />
+                	</items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>

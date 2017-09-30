@@ -4,8 +4,8 @@
 }
 
 .decoration-button-menu{
-    -fx-background-image:url("icon_window.png");
+    -fx-background-image:url("/net/starkus/mipseditor/resources/icon_window.png");
 }
 .decoration-button-menu:hover{
-    -fx-background-image:url("icon_window.png");
-}
+    -fx-background-image:url("/net/starkus/mipseditor/resources/icon_window.png");
+} 
