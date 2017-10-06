@@ -8,13 +8,14 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -59,11 +60,15 @@ public class MainWindowController {
 	@FXML
 	private MenuItem redoCmd;
 	
-	
+
 	@FXML
-	private CheckMenuItem lineNumbersCmd;
+	private RadioMenuItem lineNothingCmd;
 	@FXML
-	private CheckMenuItem lineAddressesCmd;
+	private RadioMenuItem lineNumbersCmd;
+	@FXML
+	private RadioMenuItem lineAddressesCmd;
+	@FXML
+	private ToggleGroup lineDecorators;
 	
 
 	@FXML
@@ -140,7 +145,7 @@ public class MainWindowController {
 				
 				fileTab.textProperty().addListener((obs1, oldv1, newv1) ->
 				{			
-					MainApp.getWindow().setTitle(newv + " - " + MainApp.appName);					
+					MainApp.getWindow().setTitle(newv.getText() + " - " + MainApp.appName);					
 				});
 				
 				// Immediate update
@@ -149,11 +154,24 @@ public class MainWindowController {
 			MainApp.getWindow().setTitle(title);
 			
 			
-			lineNumbersCmd.selectedProperty().addListener((obs1, oldv1, newv1) -> 
-					fileTab.getCodeArea().showNumberLines(newv1));
+			if (lineNumbersCmd.isSelected())
+				fileTab.getCodeArea().showNumberLines();
+			else if (lineAddressesCmd.isSelected())
+				fileTab.getCodeArea().showAddresses();
+			else
+				fileTab.getCodeArea().showNoLineDecorations();
 			
-			lineAddressesCmd.selectedProperty().addListener((obs1, oldv1, newv1) -> 
-					fileTab.getCodeArea().showAddresses(newv1));
+			
+			lineDecorators.selectedToggleProperty().addListener((obs1, oldv1, newv1) -> {
+				if (newv1 == null || newv1.equals(lineNothingCmd))
+					fileTab.getCodeArea().showNoLineDecorations();
+				
+				else if (newv1.equals(lineNumbersCmd))
+					fileTab.getCodeArea().showNumberLines();
+				
+				else if (newv1.equals(lineAddressesCmd))
+					fileTab.getCodeArea().showAddresses();
+			});
 			
 			
 			LoadedFileOpen loadedFile = getCurrentFile();

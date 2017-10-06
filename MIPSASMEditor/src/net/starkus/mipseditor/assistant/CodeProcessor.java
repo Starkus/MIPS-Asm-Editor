@@ -36,55 +36,42 @@ public class CodeProcessor {
 					return false;
 				})
 				.successionEnds(Duration.ofMillis(1000))
-				.supplyTask(this::process)
+				.supplyTask(this::processTask)
 				.subscribe(e -> {});
 		
-		/*FileManager.getLoadedfiles().addListener(new ListChangeListener<File, String>() {
-			@Override
-			public void onChanged(
-					MapChangeListener.Change<? extends File, ? extends String> change) {
-				
-				if (change.wasAdded())
-					relevantFiles.add(change.getKey());
-				
-				else if (change.wasRemoved())
-					relevantFiles.remove(change.getKey());
-				
-				process();
-			}
-		});*/
-		
 		/*FileManager.getLoadedfiles().addListener(new ListChangeListener<LoadedFile>() {
-			@SuppressWarnings("unchecked")
 			@Override
-			public void onChanged(Change<? extends LoadedFile> change) {
-				while (change.next())
-				{
-					if (change.wasAdded() && !change.getAddedSubList().equals(change.getRemoved()))
-					{
-						addedLoadedFiles = (List<LoadedFile>) change.getAddedSubList();
-						process();
-					}
-				}
+			public void onChanged(javafx.collections.ListChangeListener.Change<? extends LoadedFile> c)
+			{
+				process();
 			}
 		});*/
 	}
 	
-	private Task<Void> process()
+	protected Task<Void> processTask()
+	{
+		Task<Void> task = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception
+			{
+				process();
+				return null;
+			}
+		};
+		
+		return task;
+	}
+	
+	protected void process()
 	{
 		List<LoadedFile> foundDependencies = checkDependancies(addedLoadedFiles);
-		
-		if (foundDependencies.isEmpty())
-			return null;
-		
 		
 		FileManager.getLoadedfiles().addAll(foundDependencies);
 		makeDefineList();
 		
 		SyntaxHighlights.buildPatterns();
-		
-		return null;
 	}
+	
 	
 	private List<LoadedFile> checkDependancies(List<LoadedFile> loadedFiles)
 	{
@@ -187,9 +174,13 @@ public class CodeProcessor {
 							label, 
 							"Label defined in " + loadedFile.getFile().getName());
 					
+					System.out.println(label);
+					
 					Assistant.getKeywordBank().getKeywords().put(label, l);
 				}
 			}
 		}
+		
+		SyntaxHighlights.buildPatterns();
 	}
 }

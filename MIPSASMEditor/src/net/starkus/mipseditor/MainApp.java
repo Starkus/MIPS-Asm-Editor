@@ -74,28 +74,7 @@ public class MainApp extends Application {
 			JSONUtils.Load();
 			
 			/* Drag and drop files */
-			scene.setOnDragOver(e -> {
-				Dragboard dragboard = e.getDragboard();
-				if (dragboard.hasFiles())
-					e.acceptTransferModes(TransferMode.COPY);
-				else
-					e.consume();
-			});
-			
-			scene.setOnDragDropped(e -> {
-				Dragboard dragboard = e.getDragboard();
-				boolean success = false;
-				if (dragboard.hasFiles())
-				{
-					success = true;
-					for (File file : dragboard.getFiles())
-					{
-						FileManager.openFile(file);
-					}
-				}
-				e.setDropCompleted(success);
-				e.consume();
-			});
+			setUpDragNDrop(scene);
 
 			window = primaryStage;
 			primaryStage.show();
@@ -109,6 +88,33 @@ public class MainApp extends Application {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+
+	private void setUpDragNDrop(UndecoratorScene scene)
+	{
+		scene.setOnDragOver(e -> {
+			Dragboard dragboard = e.getDragboard();
+			if (dragboard.hasFiles())
+				e.acceptTransferModes(TransferMode.COPY);
+			else
+				e.consume();
+		});
+		
+		scene.setOnDragDropped(e -> {
+			Dragboard dragboard = e.getDragboard();
+			boolean success = false;
+			if (dragboard.hasFiles())
+			{
+				success = true;
+				for (File file : dragboard.getFiles())
+				{
+					FileManager.openFile(file);
+				}
+			}
+			e.setDropCompleted(success);
+			e.consume();
+		});
 	}
 	
 	

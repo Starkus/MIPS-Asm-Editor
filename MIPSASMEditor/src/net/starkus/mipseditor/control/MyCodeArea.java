@@ -2,7 +2,10 @@ package net.starkus.mipseditor.control;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -24,6 +27,8 @@ public class MyCodeArea extends CodeArea {
 	private Assistant assistant = new Assistant(this);
 	private Popup popup = new Popup();
 	private TextFlow popupFlow = new TextFlow();
+	
+	private Map<Long, Long> lineAddresses = new HashMap<>();
 
 	public MyCodeArea(FileTab fileTab) {
 		super();
@@ -53,9 +58,10 @@ public class MyCodeArea extends CodeArea {
 			}
 		}).subscribe(this::applyHighlighting);
 
-		/*EventStreams.changesOf(textProperty()).successionEnds(Duration.ofMillis(600))
-				.supplyTask(this::updateSourceAsync).subscribe(e -> {
-		});*/
+		EventStreams.changesOf(textProperty()).successionEnds(Duration.ofMillis(600))
+				.subscribe(e -> {
+					this.assistant.processCurrentFile();
+		});
 
 		setOnKeyPressed(e -> {
 			this.assistant.processKeyPress(e);
@@ -104,19 +110,17 @@ public class MyCodeArea extends CodeArea {
 		});
 	}
 	
-	public void showNumberLines(boolean f)
+	public void showNoLineDecorations()
 	{
-		if (f)
-			setParagraphGraphicFactory(LineNumberFactory.get(this));
-		else
-			setParagraphGraphicFactory(null);
+		setParagraphGraphicFactory(null);
 	}
-	public void showAddresses(boolean f)
+	public void showNumberLines()
 	{
-		if (f)
-			setParagraphGraphicFactory(LineAddressFactory.get(this));
-		else
-			setParagraphGraphicFactory(null);
+		setParagraphGraphicFactory(LineNumberFactory.get(this));
+	}
+	public void showAddresses()
+	{
+		setParagraphGraphicFactory(LineAddressFactory.get(this));
 	}
 
 	@Override
@@ -133,6 +137,7 @@ public class MyCodeArea extends CodeArea {
 		String text = getText();
 		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 			protected StyleSpans<java.util.Collection<String>> call() throws Exception {
+				calculateLineAddresses();
 				return SyntaxHighlights.computeHighlighting(text, getCaretPosition());
 			}
 		};
@@ -161,7 +166,52 @@ public class MyCodeArea extends CodeArea {
 		try {
 			setStyleSpans(0, highlighting);
 		} catch (IllegalStateException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
+	}
+	
+	private void calculateLineAddresses()
+	{
+		long programCounter = 0;
+		
+		lineAddresses.clear();
+		
+		String[] lines = getText().split("\n");
+		for (int i=0; i < lines.length; ++i)
+		{
+			String line = lines[i];
+			String[] words = line.split("\\s");
+			
+			if (line.isEmpty() || words.length == 0)
+				continue;
+			
+			if (words[0].equals(".org"))
+			{
+				try
+				{
+					long ad = Long.parseLong(line.split("\\s")[1].substring(2), 16);
+					programCounter = ad;
+				}
+				catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
+				
+				continue;
+			}
+			
+			
+			Matcher matcher = SyntaxHighlights.getPattern().matcher(words[0]);
+			
+			if (matcher.find() && matcher.group("OPCODE") != null)
+			{
+				lineAddresses.put((long) i, programCounter);
+				programCounter += 4;
+			}
+		}
+	}
+	
+	public Map<Long, Long> getLineAddresses()
+	{
+		return lineAddresses;
 	}
 }

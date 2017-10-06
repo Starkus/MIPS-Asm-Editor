@@ -1,5 +1,7 @@
 package net.starkus.mipseditor.assistant;
 
+import java.util.Optional;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Bounds;
@@ -68,7 +70,8 @@ public class Assistant {
 		
 		if (k.equals(KeyCode.SPACE))
 		{
-			//word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition()-1);
+			word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition()-1);
+			
 			suggestionMenu.getEntries().clear();
 			suggestionMenu.hide();
 			return;
@@ -76,13 +79,23 @@ public class Assistant {
 		
 		computeSuggestions(word);
 		
-		Bounds caretBounds = codeArea.getCaretBounds().get();
-		Point2D pos = new Point2D(caretBounds.getMinX(), caretBounds.getMaxY());
+		Optional<Bounds> caretBounds = codeArea.getCaretBounds();
 		
-		suggestionMenu.hide();
+		if (caretBounds.isPresent())
+		{
+			Point2D pos = new Point2D(caretBounds.get().getMinX(), caretBounds.get().getMaxY());
 		
-		if (!suggestionMenu.getEntries().isEmpty())
-			suggestionMenu.show(codeArea, pos);
+			suggestionMenu.hide();
+			
+			if (!suggestionMenu.getEntries().isEmpty())
+				suggestionMenu.show(codeArea, pos);
+		}
+	}
+	
+	
+	public void processCurrentFile()
+	{
+		codeProcessor.process();
 	}
 
 	// Branch depending on the type of suggestion to do

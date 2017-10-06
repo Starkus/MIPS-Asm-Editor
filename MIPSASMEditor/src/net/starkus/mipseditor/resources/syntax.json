@@ -187,6 +187,12 @@
 			"syntax": "BNE RS, RT, Label"
 		},
 		{
+			"keyword": "BNEZ",
+			"name": "Branch if not equal to zero",
+			"description": "Branch if the register is not equal to zero.",
+			"syntax": "BNEZ RS, Label"
+		},
+		{
 			"keyword": "J",
 			"name": "Jump",
 			"description": "Jump to the calculated address.",

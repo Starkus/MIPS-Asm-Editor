@@ -1,10 +1,9 @@
 package net.starkus.mipseditor.control;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 
-import org.fxmisc.richtext.GenericStyledArea;
 import org.reactfx.collection.LiveList;
 import org.reactfx.value.Val;
 
@@ -19,6 +18,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 
+
 public class LineAddressFactory implements IntFunction<Node>
 {
 	private static final Insets DEFAULT_INSETS = new Insets(0.0, 5.0, 0.0, 5.0);
@@ -32,27 +32,31 @@ public class LineAddressFactory implements IntFunction<Node>
     private final Val<Integer> nParagraphs;
     private final Callable<String> format;
     
+    private MyCodeArea area;
     
     
     
-    public static IntFunction<Node> get(GenericStyledArea<?, ?, ?> area) {
+    
+    public static IntFunction<Node> get(MyCodeArea area) {
         return new LineAddressFactory(area, () -> "%08X");
     }
     
     
     private LineAddressFactory(
-    		GenericStyledArea<?, ?, ?> area,
+    		MyCodeArea area,
     		Callable<String> format)
 	{
 		nParagraphs = LiveList.sizeOf(area.getParagraphs());
 		this.format = format;
+		
+		this.area = area;
 	}
     
 	
 	@Override
 	public Node apply(int value)
 	{
-		Val<String> formatted = nParagraphs.map(n -> format(value * 4));
+		Val<String> formatted = nParagraphs.map(n -> format(value));
 		
 		Label lineAddress = new Label();
 		lineAddress.setFont(DEFAULT_FONT);
@@ -69,10 +73,17 @@ public class LineAddressFactory implements IntFunction<Node>
 	
 	private String format(int x)
 	{
+		Map<Long, Long> lineAdds = area.getLineAddresses();
+		
 		try
 		{
-			return String.format(format.call(), x);
-		} catch (Exception e)
+			Long address = lineAdds.get((long) x);
+			String formatted = address == null ? "        " : 
+					String.format(format.call(), address);
+			
+			return formatted;
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			return "!";

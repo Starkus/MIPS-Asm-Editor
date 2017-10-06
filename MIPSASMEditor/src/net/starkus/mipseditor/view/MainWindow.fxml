@@ -37,8 +37,12 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="View">
                 	<items>
-                		<CheckMenuItem fx:id="lineNumbersCmd" mnemonicParsing="false" selected="true" text="Line numbers" />
-                		<CheckMenuItem fx:id="lineAddressesCmd" mnemonicParsing="false" selected="false" text="Line addresses" visible="false" />
+                		<RadioMenuItem fx:id="lineNothingCmd" mnemonicParsing="false" selected="false" text="No line decorations">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="lineDecorators" />
+                           </toggleGroup></RadioMenuItem>
+                		<RadioMenuItem fx:id="lineNumbersCmd" mnemonicParsing="false" selected="false" text="Show line numbers" toggleGroup="$lineDecorators" />
+                		<RadioMenuItem fx:id="lineAddressesCmd" mnemonicParsing="false" selected="true" text="Show line addresses" toggleGroup="$lineDecorators" />
                 	</items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">

@@ -19,6 +19,9 @@
 .lineno {
 	-fx-background-color: transparent;
 	-fx-padding: 0 16 0 10;
+	
+	-fx-font-family: "Courier New";
+	-fx-font-size: 11pt;
 }
 
 .paragraph-box:has-caret {
