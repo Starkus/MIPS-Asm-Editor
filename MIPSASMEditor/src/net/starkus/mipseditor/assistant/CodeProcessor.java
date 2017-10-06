@@ -137,7 +137,7 @@ public class CodeProcessor {
 		
 		for (LoadedFile loadedFile : FileManager.getLoadedfiles())
 		{
-			for (String line : loadedFile.read().split("\n"))
+			for (String line : loadedFile.getSource().split("\n"))
 			{
 				/* Description (comment above) */
 				if (line.contains("/*") && descBuilding == null)

@@ -148,6 +148,9 @@ public class MyCodeArea extends CodeArea {
 	
 	private void updateNearbyHighlights()
 	{
+		if (getText().isEmpty())
+			return;
+		
 		int caret = getCaretPosition();
 		int start = StringUtils.startOfLine(getText(), Math.max(0, caret - 50));
 		int end = StringUtils.endOfWord(getText(), Math.min(caret + 50, getText().length()));
@@ -163,6 +166,9 @@ public class MyCodeArea extends CodeArea {
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting)
 	{
+		if (getText().isEmpty())
+			return;
+		
 		try {
 			setStyleSpans(0, highlighting);
 		} catch (IllegalStateException e) {

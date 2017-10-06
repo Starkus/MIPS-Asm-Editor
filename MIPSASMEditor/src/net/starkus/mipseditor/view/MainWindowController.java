@@ -219,7 +219,7 @@ public class MainWindowController {
 			FileTab fileTab = (FileTab) newv;
 			LoadedFileOpen loadedFile = getCurrentFile();
 			
-			filePathLabel.setText(loadedFile == null ? "" : loadedFile.getFile().getAbsolutePath());
+			filePathLabel.setText(loadedFile.getFile() == null ? "" : loadedFile.getFile().getAbsolutePath());
 			
 			
 			/* File info */

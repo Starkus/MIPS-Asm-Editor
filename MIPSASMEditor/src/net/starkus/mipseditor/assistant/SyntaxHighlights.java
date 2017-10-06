@@ -34,7 +34,7 @@ public class SyntaxHighlights {
     //private static String selectedWord;
 	
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
-    private static final String LITERAL_PATTERN = "0[xX][0-9a-fA-F]+";
+    private static final String LITERAL_PATTERN = "0[xX][0-9a-fA-F]+" + "|" + "\\$[0-9a-fA-F]+";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String DEFINE_PATTERN = "\\[[^\n]*\\]:";
     private static final String DEFINECALL_PATTERN = "@(\\w*)\\b";
@@ -71,7 +71,7 @@ public class SyntaxHighlights {
 		KeywordBank keywordBank = Assistant.getKeywordBank();
 
 		DIRECTIVE_PATTERN = "(";
-		REGISTERNAME_PATTERN = "\\b(";
+		REGISTERNAME_PATTERN = "(?i)\\b(";
 		LABELCALL_PATTERN = "";
 		/* Put opcode with '.'s first, then the rest */
 		String op1 = "(?i)\\b(";
@@ -186,7 +186,18 @@ public class SyntaxHighlights {
 		if (lastKeywordEnd < end - start)
 			spansBuilder.add(Collections.emptyList(), end - start - lastKeywordEnd);
 		
-		return spansBuilder.create();
+		StyleSpans<Collection<String>> spans = null;
+
+		try {
+			spans = spansBuilder.create();
+		}
+		catch (IllegalStateException e)
+		{
+			// Shut the fuck up dude
+			spans = StyleSpans.singleton(Collections.emptyList(), 1);
+		}
+		
+		return spans;
 	}
 	
 	

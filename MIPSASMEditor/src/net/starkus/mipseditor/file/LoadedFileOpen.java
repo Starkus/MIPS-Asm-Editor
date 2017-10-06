@@ -177,6 +177,9 @@ public class LoadedFileOpen extends LoadedFile {
 	@Override
 	public String read()
 	{
+		if (getFile() == null)
+			return "";
+		
 		return FileIOHelper.readFile(getFile());
 	}
 

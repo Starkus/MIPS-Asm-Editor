@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -20,6 +21,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -46,7 +48,7 @@ public class SuggestionContextMenu extends Popup
 	private final ObservableList<Keyword> entries = FXCollections.observableArrayList();
 	private final List<Button> buttonList = new ArrayList<>();
 	
-	private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<>();
+	private final ObjectProperty<EventHandler<Event>> onAction = new SimpleObjectProperty<>();
 	
 	
 	public SuggestionContextMenu()
@@ -158,8 +160,13 @@ public class SuggestionContextMenu extends Popup
 			});
 			
 			b.setOnMouseClicked(e -> {
-				onAction.get().handle(new ActionEvent());
+				onAction.get().handle(e);
 				hide();
+			});
+			
+			b.setOnKeyPressed(e -> {
+				if (e.getCode() == KeyCode.ENTER)
+					onAction.get().handle(e);
 			});
 			
 			buttonList.add(b);
@@ -269,15 +276,15 @@ public class SuggestionContextMenu extends Popup
 		buttonList.forEach(b -> b.setOnMouseClicked(event));
 	}
 	
-	public EventHandler<ActionEvent> getOnAction()
+	public EventHandler<Event> getOnAction()
 	{
 		return onAction.get();
 	}
-	public void setOnAction(EventHandler<ActionEvent> handler)
+	public void setOnAction(EventHandler<Event> handler)
 	{
 		onAction.set(handler);
 	}
-	public ObjectProperty<EventHandler<ActionEvent>> onActionProperty()
+	public ObjectProperty<EventHandler<Event>> onActionProperty()
 	{
 		return onAction;
 	}
@@ -292,7 +299,13 @@ public class SuggestionContextMenu extends Popup
 	
 	public void show(Node owner, Point2D position)
 	{
-		// TODO
+		if (!isShowing() && !entries.isEmpty())
+		{
+			Keyword entry = entries.get(0);
+			
+			selectedTitle.setText(entry.getKeyword() + "\n");
+			selectedDescription.setText(entry.getDescription());
+		}
 		
 		super.show(owner, position.getX(), position.getY());
 	}

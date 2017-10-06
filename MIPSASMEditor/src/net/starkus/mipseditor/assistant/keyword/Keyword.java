@@ -28,4 +28,10 @@ public abstract class Keyword {
 	public String getDescription() {
 		return description;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return keyword;
+	}
 }

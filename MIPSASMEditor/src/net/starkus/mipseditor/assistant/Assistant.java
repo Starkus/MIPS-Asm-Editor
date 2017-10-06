@@ -2,6 +2,7 @@ package net.starkus.mipseditor.assistant;
 
 import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Bounds;
@@ -12,9 +13,11 @@ import net.starkus.mipseditor.assistant.keyword.Keyword;
 import net.starkus.mipseditor.assistant.keyword.KeywordBank;
 import net.starkus.mipseditor.assistant.keyword.KeywordDefine;
 import net.starkus.mipseditor.assistant.keyword.KeywordOpcode;
+import net.starkus.mipseditor.assistant.keyword.KeywordRegisterName;
 import net.starkus.mipseditor.control.MyCodeArea;
 import net.starkus.mipseditor.control.SuggestionContextMenu;
 import net.starkus.mipseditor.util.StringUtils;
+import net.starkus.mipseditor.util.Suggester;
 
 public class Assistant {
 	
@@ -65,31 +68,39 @@ public class Assistant {
 		if (!(k.isDigitKey() || k.isLetterKey() || k.isKeypadKey() || k == KeyCode.BACK_SPACE || k == KeyCode.SPACE))
 			return;
 		
-		String code = codeArea.getText();
-		String word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition());
-		
-		if (k.equals(KeyCode.SPACE))
-		{
-			word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition()-1);
+		Platform.runLater(() -> {
+			String code = codeArea.getText();
+			String word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition());
 			
-			suggestionMenu.getEntries().clear();
-			suggestionMenu.hide();
-			return;
-		}
-		
-		computeSuggestions(word);
-		
-		Optional<Bounds> caretBounds = codeArea.getCaretBounds();
-		
-		if (caretBounds.isPresent())
-		{
-			Point2D pos = new Point2D(caretBounds.get().getMinX(), caretBounds.get().getMaxY());
-		
-			suggestionMenu.hide();
+			if (k.equals(KeyCode.SPACE))
+			{
+				word = StringUtils.getWordBeingWritten(code, codeArea.getCaretPosition()-1);
+				
+				suggestionMenu.getEntries().clear();
+				suggestionMenu.hide();
+				return;
+			}
 			
-			if (!suggestionMenu.getEntries().isEmpty())
-				suggestionMenu.show(codeArea, pos);
-		}
+			computeSuggestions(word);
+			
+			Optional<Bounds> caretBounds = codeArea.getCaretBounds();
+			
+			if (caretBounds.isPresent())
+			{
+				Point2D pos = new Point2D(caretBounds.get().getMinX(), caretBounds.get().getMaxY());
+			
+				suggestionMenu.hide();
+				
+				if (!suggestionMenu.getEntries().isEmpty())
+					suggestionMenu.show(codeArea, pos);
+			}
+		});
+	}
+	
+	
+	public void processSourceChange()
+	{
+		
 	}
 	
 	
@@ -111,14 +122,18 @@ public class Assistant {
 			variableSuggestions(writing);
 		}
 		
-		else if (writing.matches("[A-Za-z]+")) // starts with uppercase
+		else if (writing.matches("[A-Za-z]+"))
 		{
 			opcodeSuggestions(writing);
+			registerSuggestions(writing);
 		}
 	}
 	
 	private void variableSuggestions(String writing)
 	{
+		if (writing.isEmpty())
+			return;
+		
 		// Get rid of the @ for comparing
 		final String filter = writing.substring(1).toLowerCase();
 		
@@ -131,11 +146,18 @@ public class Assistant {
 	
 	private void opcodeSuggestions(String writing)
 	{
-		for (Keyword k : keywordBank.getKeywordsByType(KeywordOpcode.class))
-		{
-			if (k.getKeyword().toUpperCase().startsWith(writing.toUpperCase()))
-				suggestionMenu.getEntries().add(k);
-		}
+		Suggester<Keyword> suggester = new Suggester<>(keywordBank.getKeywordsByType(KeywordOpcode.class));
+		suggester.setStringExtractor(k -> k.getKeyword());
+		
+		suggestionMenu.getEntries().addAll(suggester.getSortedResults(writing));
+	}
+	
+	private void registerSuggestions(String writing)
+	{
+		Suggester<Keyword> suggester = new Suggester<>(keywordBank.getKeywordsByType(KeywordRegisterName.class));
+		suggester.setStringExtractor(k -> k.getKeyword());
+		
+		suggestionMenu.getEntries().addAll(suggester.getSortedResults(writing));
 	}
 	
 	
